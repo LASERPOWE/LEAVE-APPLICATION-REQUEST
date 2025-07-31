@@ -1,160 +1,108 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Leave Application Form</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-    }
-    input, select, textarea, button {
-      width: 100%;
-      padding: 8px;
-      margin-top: 10px;
-      margin-bottom: 20px;
-    }
-    label {
-      font-weight: bold;
-    }
-  </style>
-</head>
-<body>
-  <h2>Leave Application Request</h2>
-
-  <form id="leaveForm">
-    <label for="emp_code">Employee Code:</label>
-    <input type="text" id="emp_code" name="emp_code" required />
-
-    <label for="emp_name">Employee Name:</label>
-    <input type="text" id="emp_name" name="emp_name" readonly />
-
-    <label for="hod">HOD:</label>
-    <input type="text" id="hod" name="hod" readonly />
-
-    <label for="design_name">Designation:</label>
-    <input type="text" id="design_name" name="design_name" readonly />
-
-    <label for="dept_name">Department:</label>
-    <input type="text" id="dept_name" name="dept_name" readonly />
-
-    <label for="leave_type">Leave Type:</label>
-    <select id="leave_type" name="leave_type" required>
-      <option value="">Select</option>
-      <option value="CL">CL</option>
-      <option value="SL">SL</option>
-      <option value="COFF">COFF</option>
-    </select>
-
-    <label for="from_date">From Date:</label>
-    <input type="date" id="from_date" name="from_date" required />
-
-    <label for="to_date">To Date:</label>
-    <input type="date" id="to_date" name="to_date" required />
-
-    <label for="reason">Reason:</label>
-    <textarea id="reason" name="reason" rows="3" required></textarea>
-
-    <label for="leave_count">Taken Leave Count:</label>
-    <input type="number" id="leave_count" name="leave_count" readonly />
-
-    <label for="user_mail">Your Email:</label>
-    <input type="email" id="user_mail" name="user_mail" required />
-
-    <!-- Hidden -->
-    <input type="hidden" id="hod_mail" name="hod_mail" />
-
-    <button type="submit">Submit</button>
-  </form>
-
-  <p id="status"></p>
-
+  <title>Leave Form</title>
+  <meta charset="UTF-8">
   <script>
-    const form = document.getElementById("leaveForm");
-    const status = document.getElementById("status");
+    const API_BASE = "https://script.google.com/macros/s/AKfycbyrSa9M0pfx6FHicGX1cdDve5CikViUDQnnL7lcnbjopbm5WqiuQ1rSfdsjPsGplijW/exec";
 
-    const apiBase = "https://script.google.com/macros/s/AKfycbyrSa9M0pfx6FHicGX1cdDve5CikViUDQnnL7lcnbjopbm5WqiuQ1rSfdsjPsGplijW/exec";
-
-    document.getElementById("emp_code").addEventListener("blur", () => {
+    async function fetchEmployeeData() {
       const empCode = document.getElementById("emp_code").value.trim();
       if (!empCode) return;
 
-      fetch(`${apiBase}?emp_code=${empCode}`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.found && data.employees.length > 0) {
-            const emp = data.employees[0];
-            document.getElementById("emp_name").value = emp.emp_name;
-            document.getElementById("hod").value = emp.hod;
-            document.getElementById("design_name").value = emp.desig_name;
-            document.getElementById("dept_name").value = emp.dept_name;
-            document.getElementById("hod_mail").value = emp.hod_mail;
-          } else {
-            alert("Employee not found.");
-          }
-        })
-        .catch((err) => {
-          alert("Failed to fetch employee data.");
-        });
-    });
+      try {
+        const res = await fetch(`${API_BASE}?emp_code=${empCode}`);
+        const data = await res.json();
+        if (data.found && data.employees.length > 0) {
+          const emp = data.employees[0];
+          document.getElementById("emp_name").value = emp.emp_name;
+          document.getElementById("hod").value = emp.hod;
+          document.getElementById("design_name").value = emp.desig_name;
+          document.getElementById("dept_name").value = emp.dept_name;
+          document.getElementById("hod_mail").value = emp.hod_mail;
+        } else {
+          alert("Employee not found");
+        }
+      } catch (err) {
+        alert("Failed to fetch employee data.");
+      }
+    }
 
-    document.getElementById("to_date").addEventListener("change", calculateLeave);
-    document.getElementById("from_date").addEventListener("change", calculateLeave);
+    function calculateLeaveCount() {
+      const from = new Date(document.getElementById("from_date").value);
+      const to = new Date(document.getElementById("to_date").value);
 
-    function calculateLeave() {
-      const fromDate = new Date(document.getElementById("from_date").value);
-      const toDate = new Date(document.getElementById("to_date").value);
-
-      if (toDate < fromDate) {
-        alert("TO DATE cannot be before FROM DATE");
+      if (to < from) {
+        alert("To Date cannot be earlier than From Date.");
         document.getElementById("to_date").value = "";
         document.getElementById("leave_count").value = "";
         return;
       }
 
-      if (fromDate && toDate) {
-        const diff = Math.ceil((toDate - fromDate) / (1000 * 60 * 60 * 24)) + 1;
-        document.getElementById("leave_count").value = diff;
-      }
+      const diff = (to - from) / (1000 * 60 * 60 * 24) + 1;
+      document.getElementById("leave_count").value = diff;
     }
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
+    async function handleSubmit(event) {
+      event.preventDefault();
 
-      const formData = {
-        emp_code: form.emp_code.value.trim(),
-        emp_name: form.emp_name.value,
-        hod: form.hod.value,
-        design_name: form.design_name.value,
-        dept_name: form.dept_name.value,
-        leave_type: form.leave_type.value,
-        from_date: form.from_date.value,
-        to_date: form.to_date.value,
-        reason: form.reason.value,
-        leave_count: form.leave_count.value,
-        hod_mail: form.hod_mail.value,
-        user_mail: form.user_mail.value
+      const payload = {
+        emp_code: document.getElementById("emp_code").value,
+        emp_name: document.getElementById("emp_name").value,
+        hod: document.getElementById("hod").value,
+        design_name: document.getElementById("design_name").value,
+        dept_name: document.getElementById("dept_name").value,
+        leave_type: document.getElementById("leave_type").value,
+        from_date: document.getElementById("from_date").value,
+        to_date: document.getElementById("to_date").value,
+        reason: document.getElementById("reason").value,
+        leave_count: document.getElementById("leave_count").value,
+        hod_mail: document.getElementById("hod_mail").value,
+        user_mail: document.getElementById("user_mail").value
       };
 
       try {
-        const res = await fetch(apiBase, {
+        const res = await fetch(API_BASE, {
           method: "POST",
-          mode: "cors",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(formData)
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
         });
 
         const text = await res.text();
-        status.textContent = text === "Success" ? "Form submitted successfully!" : text;
-        if (text === "Success") form.reset();
-      } catch (error) {
-        status.textContent = "Submission failed.";
-        console.error(error);
+        if (text === "Success") {
+          alert("Leave request submitted successfully!");
+          document.getElementById("leave-form").reset();
+        } else {
+          alert("Error submitting form: " + text);
+        }
+      } catch (err) {
+        alert("Failed to submit form.");
       }
-    });
+    }
   </script>
+</head>
+<body>
+  <h2>Leave Application Form</h2>
+  <form id="leave-form" onsubmit="handleSubmit(event)">
+    <label>Employee Code: <input type="text" id="emp_code" name="emp_code" required onblur="fetchEmployeeData()"></label><br>
+    <label>Employee Name: <input type="text" id="emp_name" disabled></label><br>
+    <label>HOD: <input type="text" id="hod" disabled></label><br>
+    <label>Designation: <input type="text" id="design_name" disabled></label><br>
+    <label>Department: <input type="text" id="dept_name" disabled></label><br>
+    <label>Leave Type:
+      <select id="leave_type" required>
+        <option value="CL">CL</option>
+        <option value="SL">SL</option>
+        <option value="COFF">COFF</option>
+      </select>
+    </label><br>
+    <label>From Date: <input type="date" id="from_date" required onchange="calculateLeaveCount()"></label><br>
+    <label>To Date: <input type="date" id="to_date" required onchange="calculateLeaveCount()"></label><br>
+    <label>Reason: <input type="text" id="reason" required></label><br>
+    <label>Leave Count: <input type="number" id="leave_count" readonly></label><br>
+    <label>HOD Email: <input type="email" id="hod_mail" required></label><br>
+    <label>Your Email: <input type="email" id="user_mail" required></label><br>
+    <button type="submit">Submit</button>
+  </form>
 </body>
 </html>
