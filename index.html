@@ -3,41 +3,40 @@
 <head>
   <base target="_top">
   <style>
-    html, body {
-      margin: 0; padding: 0;
+    body {
       font-family: Arial, sans-serif;
       background: #f2f2f2;
     }
     .form-container {
       max-width: 600px;
       margin: 50px auto;
-      background: #fff;
+      background: white;
       padding: 30px;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-    label { font-weight: bold; }
     input, select, textarea {
       width: 100%;
-      padding: 8px;
-      margin: 6px 0 12px 0;
-      box-sizing: border-box;
+      padding: 10px;
+      margin-bottom: 15px;
     }
     input[readonly] {
-      background: #eee;
+      background-color: #eee;
+    }
+    button {
+      background-color: green;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      cursor: pointer;
     }
     .readonly-box {
       background: #f9f9f9;
       padding: 10px;
       margin-bottom: 12px;
     }
-    #error { color: red; font-weight: bold; }
-    button {
-      padding: 10px 20px;
-      background: green;
-      color: white;
-      border: none;
-      cursor: pointer;
+    #error {
+      color: red;
     }
   </style>
 </head>
@@ -50,23 +49,22 @@
     <input type="text" name="emp_code" id="emp_code" required>
 
     <label>EMP_NAME</label>
-    <input type="text" id="emp_name" name="emp_name" readonly>
+    <input type="text" name="emp_name" id="emp_name" readonly>
 
     <label>DESIG_NAME</label>
-    <input type="text" id="desig_name" name="desig_name" readonly>
+    <input type="text" name="desig_name" id="desig_name" readonly>
 
     <label>DEPT_NAME</label>
-    <input type="text" id="dept_name" name="dept_name" readonly>
+    <input type="text" name="dept_name" id="dept_name" readonly>
 
     <label>HOD</label>
-    <input type="text" id="hod" name="hod" readonly>
+    <input type="text" name="hod" id="hod" readonly>
 
     <label>HOD MAIL</label>
-    <input type="text" id="hod_mail" name="hod_mail" readonly>
+    <input type="text" name="hod_mail" id="hod_mail" readonly>
 
     <label>LEAVE TYPE</label>
     <select name="leave_type" id="leave_type" required>
-      <option value="">Select</option>
       <option value="CL">CL</option>
       <option value="SL">SL</option>
       <option value="COFF">COFF</option>
@@ -89,7 +87,7 @@
     <textarea name="reason" required></textarea>
 
     <label>TAKEN LEAVE COUNT</label>
-    <input type="number" id="taken_leave_count" name="taken_leave_count" readonly>
+    <input type="number" name="taken_leave_count" id="taken_leave_count" readonly>
 
     <div id="error"></div>
 
@@ -105,8 +103,8 @@
 
   let leaveBalances = { CL: 0, SL: 0, COFF: 0 };
 
-  document.getElementById('emp_code').addEventListener('blur', () => {
-    const empCode = document.getElementById('emp_code').value.trim();
+  document.getElementById("emp_code").addEventListener("blur", () => {
+    const empCode = document.getElementById("emp_code").value.trim();
     if (!empCode) return;
 
     fetch(`${scriptURL}?emp_code=${empCode}`)
@@ -114,12 +112,11 @@
       .then(data => {
         if (data.found && data.employees.length > 0) {
           const emp = data.employees[0];
-
-          document.getElementById('emp_name').value = emp.emp_name || '';
-          document.getElementById('desig_name').value = emp.design_name || '';
-          document.getElementById('dept_name').value = emp.dept_name || '';
-          document.getElementById('hod').value = emp.hod || '';
-          document.getElementById('hod_mail').value = emp.hod_mail || '';
+          document.getElementById("emp_name").value = emp.emp_name || "";
+          document.getElementById("desig_name").value = emp.design_name || "";
+          document.getElementById("dept_name").value = emp.dept_name || "";
+          document.getElementById("hod").value = emp.hod || "";
+          document.getElementById("hod_mail").value = emp.hod_mail || "";
 
           leaveBalances = {
             CL: parseInt(emp.cl || 0),
@@ -127,43 +124,41 @@
             COFF: parseInt(emp.coff || 0)
           };
 
-          document.getElementById('cl_balance').innerText = leaveBalances.CL;
-          document.getElementById('sl_balance').innerText = leaveBalances.SL;
-          document.getElementById('coff_balance').innerText = leaveBalances.COFF;
-          document.getElementById('total_balance').innerText =
-            leaveBalances.CL + leaveBalances.SL + leaveBalances.COFF;
+          document.getElementById("cl_balance").innerText = leaveBalances.CL;
+          document.getElementById("sl_balance").innerText = leaveBalances.SL;
+          document.getElementById("coff_balance").innerText = leaveBalances.COFF;
+          document.getElementById("total_balance").innerText = leaveBalances.CL + leaveBalances.SL + leaveBalances.COFF;
         } else {
           alert("Employee not found!");
         }
       })
-      .catch(err => alert("Failed to fetch employee data."));
+      .catch(err => alert("Fetch error: " + err));
   });
 
-  document.getElementById('from_date').addEventListener('change', calculateLeaveDays);
-  document.getElementById('to_date').addEventListener('change', calculateLeaveDays);
-  document.getElementById('leave_type').addEventListener('change', calculateLeaveDays);
+  document.getElementById("from_date").addEventListener("change", calculateLeaveDays);
+  document.getElementById("to_date").addEventListener("change", calculateLeaveDays);
+  document.getElementById("leave_type").addEventListener("change", calculateLeaveDays);
 
   function calculateLeaveDays() {
-    const from = new Date(document.getElementById('from_date').value);
-    const to = new Date(document.getElementById('to_date').value);
+    const from = new Date(document.getElementById("from_date").value);
+    const to = new Date(document.getElementById("to_date").value);
     const errorDiv = document.getElementById("error");
 
     if (from && to && to >= from) {
       const diff = Math.ceil((to - from) / (1000 * 60 * 60 * 24)) + 1;
-      document.getElementById('taken_leave_count').value = diff;
+      document.getElementById("taken_leave_count").value = diff;
 
-      const selectedType = document.getElementById('leave_type').value;
-      if (selectedType && leaveBalances[selectedType] !== undefined) {
+      const selectedType = document.getElementById("leave_type").value;
+      if (leaveBalances[selectedType] !== undefined) {
         if (diff > leaveBalances[selectedType]) {
           errorDiv.innerText = `Insufficient balance for ${selectedType}. Only ${leaveBalances[selectedType]} available.`;
         } else {
-          errorDiv.innerText = '';
+          errorDiv.innerText = "";
         }
       }
-
     } else {
-      document.getElementById('taken_leave_count').value = '';
-      errorDiv.innerText = '';
+      document.getElementById("taken_leave_count").value = "";
+      errorDiv.innerText = "";
     }
   }
 
@@ -177,22 +172,21 @@
     }
 
     const formData = new FormData(this);
-    const plainData = new URLSearchParams();
-
-    for (const [key, value] of formData.entries()) {
-      plainData.append(key, value);
+    const params = new URLSearchParams();
+    for (const pair of formData.entries()) {
+      params.append(pair[0], pair[1]);
     }
 
     fetch(scriptURL, {
       method: "POST",
-      body: plainData,
       headers: {
         "Content-Type": "application/x-www-form-urlencoded"
-      }
+      },
+      body: params.toString()
     })
     .then(res => res.text())
     .then(response => {
-      alert("Form submitted successfully!");
+      alert(response); // shows: "Form submitted successfully."
       document.getElementById("leaveForm").reset();
       document.getElementById("cl_balance").innerText = "-";
       document.getElementById("sl_balance").innerText = "-";
@@ -201,7 +195,7 @@
       document.getElementById("error").innerText = "";
     })
     .catch(error => {
-      alert("Submission failed.");
+      alert("Submission failed: " + error);
     });
   });
 </script>
