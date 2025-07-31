@@ -2,107 +2,246 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Employee Leave Form</title>
+  <title>Leave Application Form</title>
   <style>
-    body {
+    /* Your existing styles (same as above) */
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
       font-family: Arial, sans-serif;
-      margin: 40px auto;
+    }
+
+    #bgVideo {
+      position: fixed;
+      top: 0;
+      left: 0;
+      min-width: 100%;
+      min-height: 100%;
+      object-fit: cover;
+      z-index: -2;
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: -1;
+    }
+
+    .form-container {
+      position: relative;
+      z-index: 1;
       max-width: 600px;
-      background-color: #f4f4f4;
+      background: rgba(255, 255, 255, 0.95);
+      margin: 40px auto;
       padding: 30px;
       border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      box-shadow: 0 0 10px #00000033;
+      background-image: url('https://laserpowerinfra.com/frontassets/front/images/final-loader.gif');
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 200px auto;
+      background-blend-mode: lighten;
     }
-    h2 {
-      text-align: center;
-      color: #333;
-    }
-    form {
-      display: flex;
-      flex-direction: column;
-    }
-    label {
-      margin-top: 15px;
-      font-weight: bold;
-    }
+
     input, select, textarea {
-      padding: 10px;
-      margin-top: 5px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 12px;
+      box-sizing: border-box;
     }
-    button {
-      margin-top: 20px;
-      padding: 12px;
-      background-color: #4CAF50;
-      color: white;
-      font-size: 16px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #45a049;
-    }
-    .success-message {
-      margin-top: 20px;
-      color: green;
+
+    label {
       font-weight: bold;
-      text-align: center;
+    }
+
+    input[readonly] {
+      background-color: #f0f0f0;
+    }
+
+    .readonly-box {
+      background: #eee;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+
+    #error {
+      color: red;
+      font-weight: bold;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      background: #28a745;
+      color: white;
+      border: none;
     }
   </style>
 </head>
 <body>
-  <h2>Employee Leave Form</h2>
-  <form id="leaveForm">
-    <label for="emp_code">Employee Code:</label>
-    <input type="text" id="emp_code" name="emp_code" required>
 
-    <label for="emp_name">Employee Name:</label>
-    <input type="text" id="emp_name" name="emp_name" required>
+  <!-- Background Video -->
+  <video autoplay muted loop id="bgVideo">
+    <source src="https://laserpowerinfra.com/frontassets/img/slider/Banner_v04_HD_L.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
 
-    <label for="department">Department:</label>
-    <input type="text" id="department" name="department">
+  <div class="overlay"></div>
 
-    <label for="leave_type">Leave Type:</label>
-    <select id="leave_type" name="leave_type" required>
-      <option value="">--Select--</option>
-      <option value="CL">Casual Leave</option>
-      <option value="SL">Sick Leave</option>
-      <option value="COFF">Comp Off</option>
-    </select>
+  <div class="form-container">
+    <h2>Leave Application Form</h2>
+    <form id="leaveForm">
+      <label>EMP_CODE (Enter manually)</label>
+      <input type="text" name="emp_code" id="emp_code" required>
 
-    <label for="from_date">From Date:</label>
-    <input type="date" id="from_date" name="from_date" required>
+      <label>EMP_NAME</label>
+      <input type="text" id="emp_name" name="emp_name" readonly>
 
-    <label for="to_date">To Date:</label>
-    <input type="date" id="to_date" name="to_date" required>
+      <label>DESIG_NAME</label>
+      <input type="text" id="desig_name" name="desig_name" readonly>
 
-    <label for="reason">Reason:</label>
-    <textarea id="reason" name="reason" rows="3" required></textarea>
+      <label>DEPT_NAME</label>
+      <input type="text" id="dept_name" name="dept_name" readonly>
 
-    <button type="submit">Submit</button>
-    <div class="success-message" id="responseMsg"></div>
-  </form>
+      <label>HOD</label>
+      <input type="text" id="hod" name="hod" readonly>
+
+      <label>HOD MAIL</label>
+      <input type="text" id="hod_mail" name="hod_mail" readonly>
+
+      <label>LEAVE TYPE</label>
+      <select name="leave_type" id="leave_type" required>
+        <option value="CL">CL</option>
+        <option value="SL">SL</option>
+        <option value="COFF">COFF</option>
+      </select>
+
+      <div class="readonly-box">
+        <strong>CL Balance:</strong> <span id="cl_balance">-</span><br>
+        <strong>SL Balance:</strong> <span id="sl_balance">-</span><br>
+        <strong>COFF Balance:</strong> <span id="coff_balance">-</span><br>
+        <strong>Total Balance:</strong> <span id="total_balance">-</span>
+      </div>
+
+      <label>FROM DATE</label>
+      <input type="date" name="from_date" id="from_date" required>
+
+      <label>TO DATE</label>
+      <input type="date" name="to_date" id="to_date" required>
+
+      <label>REASON</label>
+      <textarea name="reason" required></textarea>
+
+      <label>TAKEN LEAVE COUNT</label>
+      <input type="number" id="taken_leave_count" name="taken_leave_count" readonly>
+      <div id="error"></div>
+
+      <label>USER MAIL (Enter manually)</label>
+      <input type="email" name="user_mail" required>
+
+      <button type="submit">Submit</button>
+    </form>
+  </div>
 
   <script>
-    const form = document.getElementById('leaveForm');
-    form.addEventListener('submit', function(e) {
+    const API_URL = "https://script.google.com/macros/s/AKfycbxsw079DfsxyRkXbQF_z1LB2wgreA4lT0giSngSz3YJQLjMuZzxksWFB_f_9WDSPxi6/exec";
+    let leaveBalances = { CL: 0, SL: 0, COFF: 0 };
+
+    document.getElementById('emp_code').addEventListener('blur', () => {
+      const empCode = document.getElementById('emp_code').value.trim();
+      if (!empCode) return;
+
+      fetch(`${API_URL}?emp_code=${encodeURIComponent(empCode)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.emp_name) {
+            document.getElementById('emp_name').value = data.emp_name;
+            document.getElementById('desig_name').value = data.desig_name;
+            document.getElementById('dept_name').value = data.dept_name;
+            document.getElementById('hod').value = data.hod;
+            document.getElementById('hod_mail').value = data.hod_mail;
+
+            leaveBalances = {
+              CL: parseInt(data.cl || 0),
+              SL: parseInt(data.sl || 0),
+              COFF: parseInt(data.coff || 0)
+            };
+
+            document.getElementById('cl_balance').innerText = leaveBalances.CL;
+            document.getElementById('sl_balance').innerText = leaveBalances.SL;
+            document.getElementById('coff_balance').innerText = leaveBalances.COFF;
+            document.getElementById('total_balance').innerText =
+              leaveBalances.CL + leaveBalances.SL + leaveBalances.COFF;
+          } else {
+            alert("Employee not found!");
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          alert("Error fetching employee data.");
+        });
+    });
+
+    document.getElementById('from_date').addEventListener('change', calculateLeaveDays);
+    document.getElementById('to_date').addEventListener('change', calculateLeaveDays);
+    document.getElementById('leave_type').addEventListener('change', calculateLeaveDays);
+
+    function calculateLeaveDays() {
+      const from = new Date(document.getElementById('from_date').value);
+      const to = new Date(document.getElementById('to_date').value);
+      const errorDiv = document.getElementById("error");
+
+      if (from && to && to >= from) {
+        const diff = Math.ceil((to - from) / (1000 * 60 * 60 * 24)) + 1;
+        document.getElementById('taken_leave_count').value = diff;
+
+        const selectedType = document.getElementById('leave_type').value;
+        if (selectedType && leaveBalances[selectedType] !== undefined) {
+          if (diff > leaveBalances[selectedType]) {
+            errorDiv.innerText = `Insufficient balance for ${selectedType}. Only ${leaveBalances[selectedType]} available.`;
+          } else {
+            errorDiv.innerText = '';
+          }
+        }
+      } else {
+        document.getElementById('taken_leave_count').value = '';
+        errorDiv.innerText = '';
+      }
+    }
+
+    document.getElementById("leaveForm").addEventListener("submit", function (e) {
       e.preventDefault();
-      const formData = new FormData(form);
-      fetch("https://script.google.com/macros/s/AKfycbxsw079DfsxyRkXbQF_z1LB2wgreA4lT0giSngSz3YJQLjMuZzxksWFB_f_9WDSPxi6/exec", {
+      const errorText = document.getElementById("error").innerText;
+      if (errorText) {
+        alert("Cannot submit: " + errorText);
+        return;
+      }
+
+      const formData = new FormData(this);
+      fetch(API_URL, {
         method: "POST",
         body: formData
       })
-      .then(response => response.text())
-      .then(data => {
-        document.getElementById('responseMsg').innerText = "✔️ Form submitted successfully!";
-        form.reset();
-      })
-      .catch(error => {
-        document.getElementById('responseMsg').innerText = "❌ Error submitting form.";
-        console.error("Error!", error.message);
-      });
+        .then(res => res.text())
+        .then(response => {
+          alert("Form submitted successfully!");
+          document.getElementById("leaveForm").reset();
+          document.getElementById("cl_balance").innerText = "-";
+          document.getElementById("sl_balance").innerText = "-";
+          document.getElementById("coff_balance").innerText = "-";
+          document.getElementById("total_balance").innerText = "-";
+          document.getElementById("error").innerText = "";
+        })
+        .catch(err => {
+          console.error(err);
+          alert("Error submitting form.");
+        });
     });
   </script>
 </body>
