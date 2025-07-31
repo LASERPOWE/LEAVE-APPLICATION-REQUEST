@@ -1,239 +1,120 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <base target="_top">
+  <meta charset="UTF-8">
+  <title>Leave Application Form</title>
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
+    body {
       font-family: Arial, sans-serif;
+      background-color: #f1f1f1;
     }
-    #bgVideo {
-      position: fixed;
-      top: 0;
-      left: 0;
-      min-width: 100%;
-      min-height: 100%;
-      object-fit: cover;
-      z-index: -2;
-    }
-    .overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.4);
-      z-index: -1;
-    }
-    .form-container {
-      position: relative;
-      z-index: 1;
-      max-width: 600px;
-      background: rgba(255, 255, 255, 0.95);
+    .container {
+      max-width: 500px;
       margin: 40px auto;
-      padding: 30px;
+      background-color: #fff;
+      padding: 25px;
       border-radius: 10px;
-      box-shadow: 0 0 10px #00000033;
-      background-image: url('https://laserpowerinfra.com/frontassets/front/images/final-loader.gif');
-      background-repeat: no-repeat;
-      background-position: center;
-      background-size: 200px auto;
-      background-blend-mode: lighten;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-    input, select, textarea {
-      width: 100%;
-      padding: 8px;
-      margin-bottom: 12px;
-      box-sizing: border-box;
+    h2 {
+      text-align: center;
     }
-    label { font-weight: bold; }
-    input[readonly] { background-color: #f0f0f0; }
-    .readonly-box {
-      background: #eee;
-      padding: 10px;
-      margin-bottom: 10px;
-    }
-    #error {
-      color: red;
+    label {
+      display: block;
+      margin-top: 15px;
       font-weight: bold;
     }
+    input[type="text"],
+    input[type="email"],
+    input[type="date"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    textarea {
+      resize: vertical;
+    }
+    .leave-balance {
+      background-color: #eee;
+      padding: 10px;
+      margin-top: 10px;
+      font-size: 14px;
+    }
     button {
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      background: #28a745;
+      background-color: green;
       color: white;
+      padding: 10px 15px;
       border: none;
+      margin-top: 20px;
+      cursor: pointer;
+      border-radius: 5px;
+      width: 100%;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: darkgreen;
     }
   </style>
 </head>
 <body>
-  <video autoplay muted loop id="bgVideo">
-    <source src="https://laserpowerinfra.com/frontassets/img/slider/Banner_v04_HD_L.mp4" type="video/mp4">
-  </video>
-  <div class="overlay"></div>
 
-  <div class="form-container">
+  <div class="container">
     <h2>Leave Application Form</h2>
-    <form id="leaveForm">
-      <label>EMP_CODE (Enter manually)</label>
-      <input type="text" name="emp_code" id="emp_code" required>
+    <form>
+      <label for="emp_code">EMP CODE (Enter manually)</label>
+      <input type="text" id="emp_code" name="emp_code">
 
-      <label>EMP_NAME</label>
-      <input type="text" id="emp_name" name="emp_name" readonly>
+      <label for="emp_name">EMP NAME</label>
+      <input type="text" id="emp_name" name="emp_name">
 
-      <label>DESIG_NAME</label>
-      <input type="text" id="desig_name" name="desig_name" readonly>
+      <label for="design_name">DESIG NAME</label>
+      <input type="text" id="design_name" name="design_name">
 
-      <label>DEPT_NAME</label>
-      <input type="text" id="dept_name" name="dept_name" readonly>
+      <label for="dept_name">DEPT NAME</label>
+      <input type="text" id="dept_name" name="dept_name">
 
-      <label>HOD</label>
-      <input type="text" id="hod" name="hod" readonly>
+      <label for="hod">HOD</label>
+      <input type="text" id="hod" name="hod">
 
-      <label>HOD MAIL</label>
-      <input type="text" id="hod_mail" name="hod_mail" readonly>
+      <label for="hod_mail">HOD MAIL</label>
+      <input type="email" id="hod_mail" name="hod_mail">
 
-      <label>LEAVE TYPE</label>
-      <select name="leave_type" id="leave_type" required>
+      <label for="leave_type">LEAVE TYPE</label>
+      <select id="leave_type" name="leave_type">
         <option value="CL">CL</option>
         <option value="SL">SL</option>
         <option value="COFF">COFF</option>
       </select>
 
-      <div class="readonly-box">
-        <strong>CL Balance:</strong> <span id="cl_balance">-</span><br>
-        <strong>SL Balance:</strong> <span id="sl_balance">-</span><br>
-        <strong>COFF Balance:</strong> <span id="coff_balance">-</span><br>
-        <strong>Total Balance:</strong> <span id="total_balance">-</span>
+      <div class="leave-balance">
+        CL Balance: - <br>
+        SL Balance: - <br>
+        COFF Balance: - <br>
+        Total Balance: -
       </div>
 
-      <label>FROM DATE</label>
-      <input type="date" name="from_date" id="from_date" required>
+      <label for="from_date">FROM DATE</label>
+      <input type="date" id="from_date" name="from_date">
 
-      <label>TO DATE</label>
-      <input type="date" name="to_date" id="to_date" required>
+      <label for="to_date">TO DATE</label>
+      <input type="date" id="to_date" name="to_date">
 
-      <label>REASON</label>
-      <textarea name="reason" required></textarea>
+      <label for="reason">REASON</label>
+      <textarea id="reason" name="reason" rows="3"></textarea>
 
-      <label>TAKEN LEAVE COUNT</label>
-      <input type="number" id="taken_leave_count" name="leave_count" readonly>
+      <label for="leave_count">TAKEN LEAVE COUNT</label>
+      <input type="text" id="leave_count" name="leave_count">
 
-      <div id="error"></div>
-
-      <label>USER MAIL</label>
-      <input type="email" name="user_mail" required>
+      <label for="user_mail">USER MAIL</label>
+      <input type="email" id="user_mail" name="user_mail">
 
       <button type="submit">Submit</button>
     </form>
   </div>
 
-  <script>
-    const scriptURL = "https://script.google.com/macros/s/AKfycbxZocX-f5G-3jL0v_wjQyy3stnRxOIjD7QkwWaUJgdz0xG6PL62EiS3EFTWu0SJFtdeGw/exec";
-    const proxyURL = "https://corsproxy.io/?";
-    let leaveBalances = { CL: 0, SL: 0, COFF: 0 };
-
-    document.getElementById('emp_code').addEventListener('blur', () => {
-      const empCode = document.getElementById('emp_code').value.trim();
-      if (!empCode) return;
-
-      fetch(`${proxyURL}${scriptURL}?emp_code=${empCode}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.found && data.employees.length > 0) {
-            const emp = data.employees[0];
-            document.getElementById('emp_name').value = emp.emp_name;
-            document.getElementById('desig_name').value = emp.desig_name;
-            document.getElementById('dept_name').value = emp.dept_name;
-            document.getElementById('hod').value = emp.hod;
-            document.getElementById('hod_mail').value = emp.hod_mail;
-
-            leaveBalances = {
-              CL: parseInt(emp.cl || 0),
-              SL: parseInt(emp.sl || 0),
-              COFF: parseInt(emp.coff || 0)
-            };
-
-            document.getElementById('cl_balance').innerText = leaveBalances.CL;
-            document.getElementById('sl_balance').innerText = leaveBalances.SL;
-            document.getElementById('coff_balance').innerText = leaveBalances.COFF;
-            document.getElementById('total_balance').innerText =
-              leaveBalances.CL + leaveBalances.SL + leaveBalances.COFF;
-          } else {
-            alert("Employee not found!");
-          }
-        })
-        .catch(() => alert("Error fetching employee data"));
-    });
-
-    document.getElementById('from_date').addEventListener('change', calculateLeaveDays);
-    document.getElementById('to_date').addEventListener('change', calculateLeaveDays);
-
-    function calculateLeaveDays() {
-      const from = new Date(document.getElementById('from_date').value);
-      const to = new Date(document.getElementById('to_date').value);
-      const errorDiv = document.getElementById("error");
-
-      if (from && to && to >= from) {
-        const diff = Math.ceil((to - from) / (1000 * 60 * 60 * 24)) + 1;
-        document.getElementById('taken_leave_count').value = diff;
-
-        const selectedType = document.getElementById('leave_type').value;
-        if (selectedType && leaveBalances[selectedType] !== undefined) {
-          if (diff > leaveBalances[selectedType]) {
-            errorDiv.innerText = `Insufficient balance for ${selectedType}. Only ${leaveBalances[selectedType]} available.`;
-          } else {
-            errorDiv.innerText = '';
-          }
-        }
-      } else {
-        document.getElementById('taken_leave_count').value = '';
-        errorDiv.innerText = 'TO DATE cannot be before FROM DATE';
-      }
-    }
-
-    document.getElementById('leave_type').addEventListener('change', calculateLeaveDays);
-
-    document.getElementById("leaveForm").addEventListener("submit", function (e) {
-      e.preventDefault();
-
-      const errorText = document.getElementById("error").innerText;
-      if (errorText) {
-        alert("Cannot submit: " + errorText);
-        return;
-      }
-
-      const formData = Object.fromEntries(new FormData(this).entries());
-
-      fetch(`${proxyURL}${scriptURL}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(formData)
-      })
-        .then(response => response.text())
-        .then(result => {
-          if (result.includes("Success")) {
-            alert("Form submitted successfully!");
-            document.getElementById("leaveForm").reset();
-            document.getElementById("cl_balance").innerText = "-";
-            document.getElementById("sl_balance").innerText = "-";
-            document.getElementById("coff_balance").innerText = "-";
-            document.getElementById("total_balance").innerText = "-";
-            document.getElementById("error").innerText = "";
-          } else {
-            throw new Error(result);
-          }
-        })
-        .catch(error => {
-          console.error("Error submitting form:", error);
-          alert("Failed to submit form: " + error.message);
-        });
-    });
-  </script>
 </body>
 </html>
