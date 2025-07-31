@@ -1,192 +1,109 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8">
-  <title>Leave Application Form</title>
+  <title>Employee Leave Form</title>
   <style>
     body {
-      background: url('https://laserpowerinfra.com/wp-content/uploads/2021/05/Laser-Infra-homepage-banner.jpg') no-repeat center center fixed;
-      background-size: cover;
       font-family: Arial, sans-serif;
-    }
-
-    .form-container {
-      background: rgba(255, 255, 255, 0.95);
-      width: 400px;
       margin: 40px auto;
-      padding: 20px;
+      max-width: 600px;
+      background-color: #f4f4f4;
+      padding: 30px;
       border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-
     h2 {
       text-align: center;
-      margin-bottom: 20px;
+      color: #333;
     }
-
+    form {
+      display: flex;
+      flex-direction: column;
+    }
     label {
+      margin-top: 15px;
       font-weight: bold;
-      font-size: 14px;
-      display: block;
-      margin-top: 10px;
     }
-
     input, select, textarea {
-      width: 100%;
-      padding: 8px;
-      margin-top: 5px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-
-    input[readonly] {
-      background: #f1f1f1;
-    }
-
-    .leave-balance {
-      margin-top: 10px;
-      font-size: 13px;
-      line-height: 1.6;
-    }
-
-    button {
-      width: 100%;
-      margin-top: 20px;
-      background-color: green;
-      color: white;
       padding: 10px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 16px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
     }
-
+    button {
+      margin-top: 20px;
+      padding: 12px;
+      background-color: #4CAF50;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
     button:hover {
-      background-color: darkgreen;
+      background-color: #45a049;
+    }
+    .success-message {
+      margin-top: 20px;
+      color: green;
+      font-weight: bold;
+      text-align: center;
     }
   </style>
 </head>
 <body>
+  <h2>Employee Leave Form</h2>
+  <form id="leaveForm">
+    <label for="emp_code">Employee Code:</label>
+    <input type="text" id="emp_code" name="emp_code" required>
 
-<div class="form-container">
-  <h2>Leave Application Form</h2>
+    <label for="emp_name">Employee Name:</label>
+    <input type="text" id="emp_name" name="emp_name" required>
 
-  <label>EMP_CODE (Enter manually)</label>
-  <input type="text" id="empCode" placeholder="e.g., E123">
-  <button onclick="fetchDetails()">Fetch Details</button>
+    <label for="department">Department:</label>
+    <input type="text" id="department" name="department">
 
-  <label>EMP_NAME</label>
-  <input type="text" id="empName" readonly>
+    <label for="leave_type">Leave Type:</label>
+    <select id="leave_type" name="leave_type" required>
+      <option value="">--Select--</option>
+      <option value="CL">Casual Leave</option>
+      <option value="SL">Sick Leave</option>
+      <option value="COFF">Comp Off</option>
+    </select>
 
-  <label>DESIG_NAME</label>
-  <input type="text" id="desigName" readonly>
+    <label for="from_date">From Date:</label>
+    <input type="date" id="from_date" name="from_date" required>
 
-  <label>DEPT_NAME</label>
-  <input type="text" id="deptName" readonly>
+    <label for="to_date">To Date:</label>
+    <input type="date" id="to_date" name="to_date" required>
 
-  <label>HOD</label>
-  <input type="text" id="hod" readonly>
+    <label for="reason">Reason:</label>
+    <textarea id="reason" name="reason" rows="3" required></textarea>
 
-  <label>HOD MAIL</label>
-  <input type="text" id="hodMail" readonly>
+    <button type="submit">Submit</button>
+    <div class="success-message" id="responseMsg"></div>
+  </form>
 
-  <label>LEAVE TYPE</label>
-  <select id="leaveType" onchange="updateLeaveBalance()">
-    <option value="CL">CL</option>
-    <option value="SL">SL</option>
-    <option value="COFF">COFF</option>
-  </select>
-
-  <div class="leave-balance">
-    <div>CL Balance: <span id="clBal">-</span></div>
-    <div>SL Balance: <span id="slBal">-</span></div>
-    <div>COFF Balance: <span id="coffBal">-</span></div>
-    <div>Total Balance: <span id="totalBal">-</span></div>
-  </div>
-
-  <label>FROM DATE</label>
-  <input type="date" id="fromDate">
-
-  <label>TO DATE</label>
-  <input type="date" id="toDate">
-
-  <label>REASON</label>
-  <textarea id="reason" rows="3"></textarea>
-
-  <label>TAKEN LEAVE COUNT</label>
-  <input type="number" id="leaveCount" step="0.5">
-
-  <label>USER MAIL (Enter manually)</label>
-  <input type="email" id="userMail">
-
-  <button onclick="submitForm()">Submit</button>
-</div>
-
-<script>
-  const baseURL = "https://script.google.com/macros/s/AKfycby4fCr8tZTN63ypNxGUeparjkR8BhAYwNRde_LaZ-7XafTPKABGWagdEza8YoPOrrWuUA/exec";
-  let leaveData = {};
-
-  async function fetchDetails() {
-    const empCode = document.getElementById("empCode").value;
-    if (!empCode) return alert("Please enter EMP_CODE");
-
-    const res = await fetch(`${baseURL}?emp_code=${empCode}`);
-    const json = await res.json();
-
-    if (json.success) {
-      const d = json.data;
-      document.getElementById("empName").value = d.EMP_NAME || "";
-      document.getElementById("desigName").value = d.DESIG_NAME || "";
-      document.getElementById("deptName").value = d.DEPT_NAME || "";
-      document.getElementById("hod").value = d.HOD || "";
-      document.getElementById("hodMail").value = d.HOD_MAIL || "";
-
-      // Set balances
-      document.getElementById("clBal").innerText = d.CL || "0";
-      document.getElementById("slBal").innerText = d.SL || "0";
-      document.getElementById("coffBal").innerText = d.COFF || "0";
-      document.getElementById("totalBal").innerText = (
-        (parseFloat(d.CL || 0) + parseFloat(d.SL || 0) + parseFloat(d.COFF || 0)).toFixed(1)
-      );
-
-      // Save for use
-      leaveData = d;
-    } else {
-      alert("Employee not found.");
-    }
-  }
-
-  function updateLeaveBalance() {
-    // Optional: If anything changes dynamically based on leave type
-  }
-
-  async function submitForm() {
-    const payload = {
-      EMP_CODE: document.getElementById("empCode").value,
-      EMP_NAME: document.getElementById("empName").value,
-      DESIG_NAME: document.getElementById("desigName").value,
-      DEPT_NAME: document.getElementById("deptName").value,
-      HOD: document.getElementById("hod").value,
-      HOD_MAIL: document.getElementById("hodMail").value,
-      LEAVE_TYPE: document.getElementById("leaveType").value,
-      FROM_DATE: document.getElementById("fromDate").value,
-      TO_DATE: document.getElementById("toDate").value,
-      REASON: document.getElementById("reason").value,
-      TAKEN_LEAVE_COUNT: document.getElementById("leaveCount").value,
-      USER_MAIL: document.getElementById("userMail").value
-    };
-
-    const res = await fetch(baseURL, {
-      method: "POST",
-      body: JSON.stringify(payload),
-      headers: {
-        "Content-Type": "application/json"
-      }
+  <script>
+    const form = document.getElementById('leaveForm');
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const formData = new FormData(form);
+      fetch("https://script.google.com/macros/s/AKfycbxsw079DfsxyRkXbQF_z1LB2wgreA4lT0giSngSz3YJQLjMuZzxksWFB_f_9WDSPxi6/exec", {
+        method: "POST",
+        body: formData
+      })
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById('responseMsg').innerText = "✔️ Form submitted successfully!";
+        form.reset();
+      })
+      .catch(error => {
+        document.getElementById('responseMsg').innerText = "❌ Error submitting form.";
+        console.error("Error!", error.message);
+      });
     });
-
-    const result = await res.json();
-    alert(result.message || "Form Submitted Successfully!");
-  }
-</script>
-
+  </script>
 </body>
 </html>
