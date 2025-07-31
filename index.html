@@ -80,15 +80,14 @@
       color: red;
       text-align: center;
       margin-top: 10px;
-      font-weight: bold;
     }
 
-    #leave-balance {
-      margin-bottom: 20px;
-      background-color: #f3f3f3;
+    .balance-info {
+      margin: 10px 0;
       padding: 10px;
+      background-color: #f1f1f1;
       border-radius: 8px;
-      font-size: 14px;
+      font-weight: bold;
     }
 
     @media (max-width: 600px) {
@@ -108,12 +107,11 @@
   <div class="form-container">
     <h2>Leave Application Form</h2>
 
-    <!-- Leave Balance Section -->
-    <div id="leave-balance">
-      <strong>CL Balance:</strong> <span id="cl_balance">-</span><br>
-      <strong>SL Balance:</strong> <span id="sl_balance">-</span><br>
-      <strong>COFF Balance:</strong> <span id="coff_balance">-</span><br>
-      <strong>Total Balance:</strong> <span id="total_balance">-</span>
+    <div class="balance-info">
+      CL Balance: <span id="cl_balance">-</span> |
+      SL Balance: <span id="sl_balance">-</span> |
+      COFF Balance: <span id="coff_balance">-</span> |
+      Total Balance: <span id="total_balance">-</span>
     </div>
 
     <form id="leaveForm">
@@ -179,13 +177,28 @@
   <script>
     const scriptURL = 'https://script.google.com/macros/s/AKfycbw98lNUp42hvEA-yOTI96At0wDlqhw9yX8oALIjrh13H6RWnmIEgS9LE87ScJ2AT8GvjA/exec';
 
-    document.getElementById("emp_code").addEventListener("change", function () {
+    const empCodeInput = document.getElementById("emp_code");
+    const submitBtn = document.querySelector("button[type='submit']");
+    const error = document.getElementById("error");
+    const form = document.getElementById("leaveForm");
+
+    empCodeInput.addEventListener("change", function () {
       const empCode = this.value.trim();
       if (!empCode) return;
+
+      empCodeInput.disabled = true;
+      error.innerText = "Fetching data...";
+
+      const timeout = setTimeout(() => {
+        error.innerText = "Request timeout. Please check your internet.";
+        empCodeInput.disabled = false;
+      }, 10000);
 
       fetch(`${scriptURL}?emp_code=${empCode}`)
         .then(res => res.json())
         .then(data => {
+          clearTimeout(timeout);
+          empCodeInput.disabled = false;
           if (data.found) {
             const emp = data.employees[0];
             document.getElementById("emp_name").value = emp.emp_name;
@@ -200,23 +213,26 @@
             document.getElementById("coff_balance").innerText = emp.coff || 0;
             document.getElementById("total_balance").innerText = emp.total_leave || 0;
 
-            // Store balances in form dataset
-            const form = document.getElementById("leaveForm");
             form.dataset.cl = emp.cl || 0;
             form.dataset.sl = emp.sl || 0;
             form.dataset.coff = emp.coff || 0;
 
+            error.innerText = "";
           } else {
-            alert("Employee not found.");
+            error.innerText = "Employee not found.";
           }
         })
-        .catch(err => alert("Fetch failed: " + err.message));
+        .catch(err => {
+          clearTimeout(timeout);
+          error.innerText = "Error: " + err.message;
+          empCodeInput.disabled = false;
+        });
     });
 
     function calculateLeave() {
       const from = new Date(document.getElementById("from_date").value);
       const to = new Date(document.getElementById("to_date").value);
-      const error = document.getElementById("error");
+      const leaveType = document.getElementById("leave_type").value;
 
       if (isNaN(from.getTime()) || isNaN(to.getTime())) return;
 
@@ -229,10 +245,7 @@
       const days = (to - from) / (1000 * 60 * 60 * 24) + 1;
       document.getElementById("taken_leave_count").value = days;
 
-      const leaveType = document.getElementById("leave_type").value;
-      const form = document.getElementById("leaveForm");
       let balance = 0;
-
       if (leaveType === "CL") balance = parseFloat(form.dataset.cl || 0);
       else if (leaveType === "SL") balance = parseFloat(form.dataset.sl || 0);
       else if (leaveType === "COFF") balance = parseFloat(form.dataset.coff || 0);
@@ -248,14 +261,17 @@
     document.getElementById("to_date").addEventListener("change", calculateLeave);
     document.getElementById("leave_type").addEventListener("change", calculateLeave);
 
-    document.getElementById("leaveForm").addEventListener("submit", function (e) {
+    form.addEventListener("submit", function (e) {
       e.preventDefault();
-      if (document.getElementById("error").innerText) {
+      if (error.innerText) {
         alert("Fix errors before submitting.");
         return;
       }
 
-      const formData = new FormData(this);
+      submitBtn.disabled = true;
+      submitBtn.innerText = "Submitting...";
+
+      const formData = new FormData(form);
 
       fetch(scriptURL, {
         method: "POST",
@@ -264,14 +280,19 @@
         .then(res => res.text())
         .then(msg => {
           alert(msg);
-          this.reset();
+          form.reset();
           document.getElementById("cl_balance").innerText = "-";
           document.getElementById("sl_balance").innerText = "-";
           document.getElementById("coff_balance").innerText = "-";
           document.getElementById("total_balance").innerText = "-";
+          error.innerText = "";
         })
         .catch(err => {
           alert("Submission failed: " + err.message);
+        })
+        .finally(() => {
+          submitBtn.disabled = false;
+          submitBtn.innerText = "Submit";
         });
     });
   </script>
