@@ -1,1 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Leave Application Form</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f1f1f1;
+    }
+    .container {
+      max-width: 500px;
+      margin: 40px auto;
+      background-color: #fff;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    input[type="text"],
+    input[type="email"],
+    input[type="date"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    textarea {
+      resize: vertical;
+    }
+    button {
+      background-color: green;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      margin-top: 20px;
+      cursor: pointer;
+      border-radius: 5px;
+      width: 100%;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: darkgreen;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Leave Application Form</h2>
+    <form onsubmit="submitForm(event)">
+      <label>EMP CODE</label>
+      <input type="text" name="emp_code" required>
+
+      <label>EMP NAME</label>
+      <input type="text" name="emp_name" required>
+
+      <label>HOD</label>
+      <input type="text" name="hod" required>
+
+      <label>DESIG NAME</label>
+      <input type="text" name="design_name" required>
+
+      <label>DEPT NAME</label>
+      <input type="text" name="dept_name" required>
+
+      <label>LEAVE TYPE</label>
+      <select name="leave_type" required>
+        <option value="CL">CL</option>
+        <option value="SL">SL</option>
+        <option value="COFF">COFF</option>
+      </select>
+
+      <label>FROM DATE</label>
+      <input type="date" name="from_date" required>
+
+      <label>TO DATE</label>
+      <input type="date" name="to_date" required>
+
+      <label>REASON</label>
+      <textarea name="reason" rows="3" required></textarea>
+
+      <label>TAKEN LEAVE COUNT</label>
+      <input type="text" name="leave_count" required>
+
+      <label>HOD MAIL ID</label>
+      <input type="email" name="hod_mail" required>
+
+      <label>USER MAIL</label>
+      <input type="email" name="user_mail" required>
+
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+
+  <script>
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbxckP9i8Tyx55lUNRy_xHVAjA4duYmrcBKDycEeJlB-1CqxpCfCEVoOdHRpG82R8tnNHg/exec'; // 🔁 Replace this with your actual URL
+
+    function submitForm(e) {
+      e.preventDefault();
+
+      const form = e.target;
+      const data = {
+        emp_code: form.emp_code.value,
+        emp_name: form.emp_name.value,
+        hod: form.hod.value,
+        design_name: form.design_name.value,
+        dept_name: form.dept_name.value,
+        leave_type: form.leave_type.value,
+        from_date: form.from_date.value,
+        to_date: form.to_date.value,
+        reason: form.reason.value,
+        leave_count: form.leave_count.value,
+        hod_mail: form.hod_mail.value,
+        user_mail: form.user_mail.value
+      };
+
+      fetch(scriptURL, {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: { "Content-Type": "application/json" }
+      })
+      .then(response => {
+        alert("Form submitted successfully!");
+        form.reset();
+      })
+      .catch(error => {
+        alert("Submission failed: " + error.message);
+      });
+    }
+  </script>
+
+</body>
+</html>
 
