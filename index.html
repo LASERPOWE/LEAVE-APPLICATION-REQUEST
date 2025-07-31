@@ -120,7 +120,7 @@
       <textarea name="reason" required></textarea>
 
       <label>TAKEN LEAVE COUNT</label>
-      <input type="number" id="taken_leave_count" name="leave_count" readonly>
+      <input type="number" id="taken_leave_count" name="taken_leave_count" readonly>
 
       <div id="error"></div>
 
@@ -205,32 +205,32 @@
       }
 
       const formData = Object.fromEntries(new FormData(this).entries());
+      formData.leave_count = formData.taken_leave_count;
+      delete formData.taken_leave_count;
 
-      fetch(scriptURL, {
-        method: 'POST',
-        body: JSON.stringify(formData),
-        headers: {
-          'Content-Type': 'application/json'
+      fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(scriptURL)}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData)
+      })
+      .then(response => response.text())
+      .then(result => {
+        if (result.includes("Success")) {
+          alert("Form submitted successfully!");
+          document.getElementById("leaveForm").reset();
+          document.getElementById("cl_balance").innerText = "-";
+          document.getElementById("sl_balance").innerText = "-";
+          document.getElementById("coff_balance").innerText = "-";
+          document.getElementById("total_balance").innerText = "-";
+          document.getElementById("error").innerText = "";
+        } else {
+          throw new Error(result);
         }
       })
-        .then(response => response.text())
-        .then(result => {
-          if (result.includes("Success")) {
-            alert("Form submitted successfully!");
-            document.getElementById("leaveForm").reset();
-            document.getElementById("cl_balance").innerText = "-";
-            document.getElementById("sl_balance").innerText = "-";
-            document.getElementById("coff_balance").innerText = "-";
-            document.getElementById("total_balance").innerText = "-";
-            document.getElementById("error").innerText = "";
-          } else {
-            alert("Error: " + result);
-          }
-        })
-        .catch(error => {
-          console.error(error);
-          alert("Error submitting form.");
-        });
+      .catch(error => {
+        console.error("Error submitting form:", error);
+        alert("Failed to submit form: " + error.message);
+      });
     });
   </script>
 </body>
