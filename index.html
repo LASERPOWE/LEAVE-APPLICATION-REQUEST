@@ -38,12 +38,6 @@
     textarea {
       resize: vertical;
     }
-    .leave-balance {
-      background-color: #eee;
-      padding: 10px;
-      margin-top: 10px;
-      font-size: 14px;
-    }
     button {
       background-color: green;
       color: white;
@@ -64,57 +58,91 @@
 
   <div class="container">
     <h2>Leave Application Form</h2>
-    <form>
-      <label for="emp_code">EMP CODE (Enter manually)</label>
-      <input type="text" id="emp_code" name="emp_code">
+    <form onsubmit="submitForm(event)">
+      <label>EMP CODE</label>
+      <input type="text" name="emp_code" required>
 
-      <label for="emp_name">EMP NAME</label>
-      <input type="text" id="emp_name" name="emp_name">
+      <label>EMP NAME</label>
+      <input type="text" name="emp_name" required>
 
-      <label for="design_name">DESIG NAME</label>
-      <input type="text" id="design_name" name="design_name">
+      <label>HOD</label>
+      <input type="text" name="hod" required>
 
-      <label for="dept_name">DEPT NAME</label>
-      <input type="text" id="dept_name" name="dept_name">
+      <label>DESIG NAME</label>
+      <input type="text" name="design_name" required>
 
-      <label for="hod">HOD</label>
-      <input type="text" id="hod" name="hod">
+      <label>DEPT NAME</label>
+      <input type="text" name="dept_name" required>
 
-      <label for="hod_mail">HOD MAIL</label>
-      <input type="email" id="hod_mail" name="hod_mail">
-
-      <label for="leave_type">LEAVE TYPE</label>
-      <select id="leave_type" name="leave_type">
+      <label>LEAVE TYPE</label>
+      <select name="leave_type" required>
         <option value="CL">CL</option>
         <option value="SL">SL</option>
         <option value="COFF">COFF</option>
       </select>
 
-      <div class="leave-balance">
-        CL Balance: - <br>
-        SL Balance: - <br>
-        COFF Balance: - <br>
-        Total Balance: -
-      </div>
+      <label>FROM DATE</label>
+      <input type="date" name="from_date" required>
 
-      <label for="from_date">FROM DATE</label>
-      <input type="date" id="from_date" name="from_date">
+      <label>TO DATE</label>
+      <input type="date" name="to_date" required>
 
-      <label for="to_date">TO DATE</label>
-      <input type="date" id="to_date" name="to_date">
+      <label>REASON</label>
+      <textarea name="reason" rows="3" required></textarea>
 
-      <label for="reason">REASON</label>
-      <textarea id="reason" name="reason" rows="3"></textarea>
+      <label>TAKEN LEAVE COUNT</label>
+      <input type="text" name="leave_count" required>
 
-      <label for="leave_count">TAKEN LEAVE COUNT</label>
-      <input type="text" id="leave_count" name="leave_count">
+      <label>HOD APPROVAL</label>
+      <input type="text" name="hod_approval" placeholder="Pending / Approved / Rejected" required>
 
-      <label for="user_mail">USER MAIL</label>
-      <input type="email" id="user_mail" name="user_mail">
+      <label>HOD MAIL ID</label>
+      <input type="email" name="hod_mail" required>
+
+      <label>USER MAIL</label>
+      <input type="email" name="user_mail" required>
 
       <button type="submit">Submit</button>
     </form>
   </div>
+
+  <script>
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbxZocX-f5G-3jL0v_wjQyy3stnRxOIjD7QkwWaUJgdz0xG6PL62EiS3EFTWu0SJFtdeGw/exec';
+
+    function submitForm(e) {
+      e.preventDefault();
+
+      const form = e.target;
+      const data = {
+        emp_code: form.emp_code.value,
+        emp_name: form.emp_name.value,
+        hod: form.hod.value,
+        design_name: form.design_name.value,
+        dept_name: form.dept_name.value,
+        leave_type: form.leave_type.value,
+        from_date: form.from_date.value,
+        to_date: form.to_date.value,
+        reason: form.reason.value,
+        leave_count: form.leave_count.value,
+        hod_approval: form.hod_approval.value,
+        hod_mail: form.hod_mail.value,
+        user_mail: form.user_mail.value
+      };
+
+      fetch(scriptURL, {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: { "Content-Type": "application/json" }
+      })
+      .then(response => {
+        alert("Form submitted successfully!");
+        form.reset();
+      })
+      .catch(error => {
+        alert("Submission failed: " + error.message);
+      });
+    }
+  </script>
 
 </body>
 </html>
