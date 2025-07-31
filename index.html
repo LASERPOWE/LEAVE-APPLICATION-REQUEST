@@ -1,150 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Leave Application Form</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f9f9f9;
-    }
-    .container {
-      max-width: 500px;
-      margin: 40px auto;
-      background-color: #fff;
-      padding: 25px;
-      border-radius: 10px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.1);
-    }
-    h2 {
-      text-align: center;
-      color: #333;
-    }
-    label {
-      display: block;
-      margin-top: 15px;
-      font-weight: bold;
-    }
-    input[type="text"],
-    input[type="email"],
-    input[type="date"],
-    select,
-    textarea {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      box-sizing: border-box;
-    }
-    textarea {
-      resize: vertical;
-    }
-    button {
-      margin-top: 20px;
-      width: 100%;
-      background-color: #28a745;
-      color: white;
-      padding: 12px;
-      border: none;
-      font-size: 16px;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-    button:hover {
-      background-color: #218838;
-    }
+    body { font-family: sans-serif; background: #f5f5f5; display: flex; justify-content: center; padding: 40px; }
+    form { background: white; padding: 20px; border-radius: 10px; width: 400px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    input, textarea, select, button { width: 100%; margin: 10px 0; padding: 10px; font-size: 14px; }
+    button { background-color: green; color: white; border: none; cursor: pointer; }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <h2>Leave Application Form</h2>
-    <form onsubmit="submitForm(event)">
-      <label for="emp_code">EMP CODE</label>
-      <input type="text" name="emp_code" required />
+<form id="leaveForm">
+  <h2>Leave Application Form</h2>
 
-      <label for="emp_name">EMP NAME</label>
-      <input type="text" name="emp_name" required />
+  <input type="text" name="emp_code" placeholder="EMP CODE" required />
+  <input type="text" name="emp_name" placeholder="EMP NAME" required />
+  <input type="text" name="hod" placeholder="HOD" required />
+  <input type="text" name="design_name" placeholder="DESIGN NAME" required />
+  <input type="text" name="dept_name" placeholder="DEPT NAME" required />
+  <select name="leave_type" required>
+    <option value="CL">CL</option>
+    <option value="SL">SL</option>
+    <option value="COFF">COFF</option>
+  </select>
+  <input type="date" name="from_date" required />
+  <input type="date" name="to_date" required />
+  <textarea name="reason" placeholder="REASON" required></textarea>
+  <input type="text" name="leave_count" placeholder="TAKEN LEAVE COUNT" required />
+  <input type="email" name="hod_mail" placeholder="HOD MAIL" required />
+  <input type="email" name="user_mail" placeholder="USER MAIL" required />
 
-      <label for="hod">HOD</label>
-      <input type="text" name="hod" required />
+  <button type="submit">Submit</button>
+</form>
 
-      <label for="design_name">DESIG NAME</label>
-      <input type="text" name="design_name" required />
+<script>
+  const form = document.getElementById("leaveForm");
+  const scriptURL = "https://script.google.com/macros/s/AKfycbzfn9RVRr71uZRnUpACCLFQusNwjOPDf6DTm6FqtR3ZR5ZZFz1QAyr_VRBFlSHJ1lZ33w/exec";
 
-      <label for="dept_name">DEPT NAME</label>
-      <input type="text" name="dept_name" required />
+  form.addEventListener("submit", e => {
+    e.preventDefault();
+    const formData = new FormData(form);
+    const data = {};
 
-      <label for="leave_type">LEAVE TYPE</label>
-      <select name="leave_type" required>
-        <option value="">Select</option>
-        <option value="CL">CL</option>
-        <option value="SL">SL</option>
-        <option value="COFF">COFF</option>
-      </select>
+    formData.forEach((value, key) => {
+      data[key] = value;
+    });
 
-      <label for="from_date">FROM DATE</label>
-      <input type="date" name="from_date" required />
-
-      <label for="to_date">TO DATE</label>
-      <input type="date" name="to_date" required />
-
-      <label for="reason">REASON</label>
-      <textarea name="reason" rows="3" required></textarea>
-
-      <label for="leave_count">TAKEN LEAVE COUNT</label>
-      <input type="text" name="leave_count" required />
-
-      <label for="hod_mail">HOD MAIL ID</label>
-      <input type="email" name="hod_mail" required />
-
-      <label for="user_mail">USER MAIL</label>
-      <input type="email" name="user_mail" required />
-
-      <button type="submit">Submit</button>
-    </form>
-  </div>
-
-  <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbxXUphi_khMrdaO5y5BDM0XTwFXbazXI_XRMsaxvwJ36yvlekolZ-vTBqJlRQFhM9pKdg/exec';
-
-    function submitForm(event) {
-      event.preventDefault();
-      const form = event.target;
-
-      const data = {
-        emp_code: form.emp_code.value,
-        emp_name: form.emp_name.value,
-        hod: form.hod.value,
-        design_name: form.design_name.value,
-        dept_name: form.dept_name.value,
-        leave_type: form.leave_type.value,
-        from_date: form.from_date.value,
-        to_date: form.to_date.value,
-        reason: form.reason.value,
-        leave_count: form.leave_count.value,
-        hod_mail: form.hod_mail.value,
-        user_mail: form.user_mail.value
-      };
-
-      fetch(scriptURL, {
-        method: 'POST',
-        body: JSON.stringify(data),
-        headers: {
-          "Content-Type": "application/json"
-        }
-      })
-      .then(response => response.text())
-      .then(msg => {
-        alert("Form submitted successfully!");
-        form.reset();
-      })
-      .catch(err => {
-        alert("Submission failed: " + err.message);
-      });
-    }
-  </script>
+    fetch(scriptURL, {
+      method: "POST",
+      mode: "no-cors", // IMPORTANT
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    })
+    .then(() => alert("Submitted Successfully!"))
+    .catch(err => alert("Error: " + err));
+  });
+</script>
 
 </body>
 </html>
