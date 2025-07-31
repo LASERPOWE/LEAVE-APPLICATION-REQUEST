@@ -1,16 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Leave Application Form</title>
   <style>
-    body, html {
+    html, body {
       margin: 0;
       padding: 0;
-      font-family: Arial, sans-serif;
+      font-family: Arial;
       height: 100%;
     }
-
     #bgVideo {
       position: fixed;
       top: 0;
@@ -20,58 +19,44 @@
       object-fit: cover;
       z-index: -2;
     }
-
     .overlay {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.4);
+      background: rgba(0,0,0,0.4);
       z-index: -1;
     }
-
     .form-container {
-      position: relative;
-      z-index: 1;
       max-width: 600px;
-      background: rgba(255, 255, 255, 0.95);
       margin: 40px auto;
+      background: rgba(255,255,255,0.95);
       padding: 30px;
       border-radius: 10px;
-      box-shadow: 0 0 10px #00000033;
-      background-image: url('https://laserpowerinfra.com/frontassets/front/images/final-loader.gif');
-      background-repeat: no-repeat;
-      background-position: center;
-      background-size: 200px auto;
+      z-index: 1;
     }
-
     input, select, textarea {
       width: 100%;
       padding: 8px;
       margin-bottom: 12px;
-      box-sizing: border-box;
     }
-
-    label { font-weight: bold; }
-
-    .readonly-box {
+    input[readonly] {
       background: #eee;
-      padding: 10px;
-      margin-bottom: 10px;
     }
-
+    .readonly-box {
+      background: #f0f0f0;
+      padding: 10px;
+    }
     #error {
       color: red;
       font-weight: bold;
     }
-
     button {
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      background: #28a745;
+      background: green;
       color: white;
+      padding: 10px;
+      font-size: 16px;
       border: none;
     }
   </style>
@@ -81,20 +66,16 @@
 <video autoplay muted loop id="bgVideo">
   <source src="https://laserpowerinfra.com/frontassets/img/slider/Banner_v04_HD_L.mp4" type="video/mp4">
 </video>
-
 <div class="overlay"></div>
 
 <div class="form-container">
   <h2>Leave Application Form</h2>
   <form id="leaveForm">
-    <label>EMP_CODE (Enter manually)</label>
-    <input type="text" name="emp_code" id="emp_code" required>
+    <label>EMP_CODE</label>
+    <input type="text" id="emp_code" name="emp_code" required>
 
     <label>EMP_NAME</label>
     <input type="text" id="emp_name" name="emp_name" readonly>
-
-    <label>EMP_CATEGORY</label>
-    <input type="text" id="emp_catg_name" name="emp_catg_name" readonly>
 
     <label>DESIG_NAME</label>
     <input type="text" id="desig_name" name="desig_name" readonly>
@@ -109,146 +90,142 @@
     <input type="text" id="hod_mail" name="hod_mail" readonly>
 
     <label>LEAVE TYPE</label>
-    <select name="leave_type" id="leave_type" required>
+    <select id="leave_type" name="leave_type" required>
       <option value="CL">CL</option>
       <option value="SL">SL</option>
       <option value="COFF">COFF</option>
     </select>
 
     <div class="readonly-box">
-      <strong>CL Balance:</strong> <span id="cl_balance">-</span><br>
-      <strong>SL Balance:</strong> <span id="sl_balance">-</span><br>
-      <strong>COFF Balance:</strong> <span id="coff_balance">-</span><br>
-      <strong>Total Balance:</strong> <span id="total_balance">-</span>
+      <strong>CL:</strong> <span id="cl_balance">-</span><br>
+      <strong>SL:</strong> <span id="sl_balance">-</span><br>
+      <strong>COFF:</strong> <span id="coff_balance">-</span><br>
+      <strong>Total:</strong> <span id="total_balance">-</span>
     </div>
 
     <label>FROM DATE</label>
-    <input type="date" name="from_date" id="from_date" required>
+    <input type="date" id="from_date" name="from_date" required>
 
     <label>TO DATE</label>
-    <input type="date" name="to_date" id="to_date" required>
+    <input type="date" id="to_date" name="to_date" required>
 
     <label>REASON</label>
     <textarea name="reason" required></textarea>
 
-    <label>LEAVE COUNT</label>
+    <label>TAKEN LEAVE COUNT</label>
     <input type="number" id="leave_count" name="leave_count" readonly>
+
     <div id="error"></div>
 
     <label>USER MAIL</label>
-    <input type="email" name="user_mail" id="user_mail" required>
+    <input type="email" id="user_mail" name="user_mail" required>
 
     <button type="submit">Submit</button>
   </form>
 </div>
 
 <script>
-const endpoint = "https://script.google.com/macros/s/AKfycby4fCr8tZTN63ypNxGUeparjkR8bhAYwNRde_LaZ-7XafTPKABGWagdEza8YoPOrrWuUA/exec";
-let leaveBalances = { CL: 0, SL: 0, COFF: 0 };
+  const url = "https://script.google.com/macros/s/AKfycbxIFo-h5kWMr7JeZdgHGeHIP5q8CwnS34hkknqIuRYaSm4Ui7QyFlc2odIXEn27s7Sd3A/exec";
+  let leaveBalances = { CL: 0, SL: 0, COFF: 0 };
 
-document.getElementById('emp_code').addEventListener('blur', () => {
-  const empCode = document.getElementById('emp_code').value.trim();
-  if (!empCode) return;
+  document.getElementById("emp_code").addEventListener("blur", async () => {
+    const code = document.getElementById("emp_code").value.trim();
+    if (!code) return;
 
-  fetch(`${endpoint}?emp_code=${encodeURIComponent(empCode)}`)
-    .then(res => res.json())
-    .then(json => {
+    try {
+      const res = await fetch(`${url}?emp_code=${encodeURIComponent(code)}`);
+      const json = await res.json();
+
       if (json.found && json.employees.length > 0) {
-        const data = json.employees[0];
-        document.getElementById('emp_name').value = data.emp_name;
-        document.getElementById('emp_catg_name').value = data.emp_catg_name;
-        document.getElementById('desig_name').value = data.desig_name;
-        document.getElementById('dept_name').value = data.dept_name;
-        document.getElementById('hod').value = data.hod;
-        document.getElementById('hod_mail').value = data.hod_mail;
+        const emp = json.employees[0];
+        document.getElementById("emp_name").value = emp.emp_name;
+        document.getElementById("desig_name").value = emp.desig_name;
+        document.getElementById("dept_name").value = emp.dept_name;
+        document.getElementById("hod").value = emp.hod;
+        document.getElementById("hod_mail").value = emp.hod_mail;
 
         leaveBalances = {
-          CL: parseInt(data.cl || 0),
-          SL: parseInt(data.sl || 0),
-          COFF: parseInt(data.coff || 0)
+          CL: parseInt(emp.cl || 0),
+          SL: parseInt(emp.sl || 0),
+          COFF: parseInt(emp.coff || 0)
         };
 
-        document.getElementById('cl_balance').innerText = leaveBalances.CL;
-        document.getElementById('sl_balance').innerText = leaveBalances.SL;
-        document.getElementById('coff_balance').innerText = leaveBalances.COFF;
-        document.getElementById('total_balance').innerText = leaveBalances.CL + leaveBalances.SL + leaveBalances.COFF;
+        document.getElementById("cl_balance").innerText = leaveBalances.CL;
+        document.getElementById("sl_balance").innerText = leaveBalances.SL;
+        document.getElementById("coff_balance").innerText = leaveBalances.COFF;
+        document.getElementById("total_balance").innerText =
+          leaveBalances.CL + leaveBalances.SL + leaveBalances.COFF;
       } else {
-        alert("Employee not found!");
+        alert("Employee not found.");
       }
-    })
-    .catch(err => {
+    } catch (e) {
       alert("Error fetching data.");
-      console.error(err);
-    });
-});
-
-document.getElementById("from_date").addEventListener("change", calculateLeaveDays);
-document.getElementById("to_date").addEventListener("change", calculateLeaveDays);
-document.getElementById("leave_type").addEventListener("change", calculateLeaveDays);
-
-function calculateLeaveDays() {
-  const from = new Date(document.getElementById("from_date").value);
-  const to = new Date(document.getElementById("to_date").value);
-  const errorDiv = document.getElementById("error");
-  const today = new Date();
-  today.setHours(0,0,0,0);
-
-  if (to < today) {
-    errorDiv.innerText = "TO DATE cannot be a backdate.";
-    return;
-  }
-
-  if (from && to && to >= from) {
-    const diff = Math.floor((to - from) / (1000 * 60 * 60 * 24)) + 1;
-    document.getElementById("leave_count").value = diff;
-    const type = document.getElementById("leave_type").value;
-    if (diff > leaveBalances[type]) {
-      errorDiv.innerText = `Only ${leaveBalances[type]} ${type} leave(s) available.`;
-    } else {
-      errorDiv.innerText = '';
     }
-  } else {
-    document.getElementById("leave_count").value = '';
-    errorDiv.innerText = '';
-  }
-}
-
-document.getElementById("leaveForm").addEventListener("submit", function (e) {
-  e.preventDefault();
-  const errorDiv = document.getElementById("error");
-  if (errorDiv.innerText) {
-    alert("Fix error: " + errorDiv.innerText);
-    return;
-  }
-
-  const formData = Object.fromEntries(new FormData(this).entries());
-
-  fetch(endpoint, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(formData)
-  })
-  .then(res => res.text())
-  .then(text => {
-    if (text.includes("Success")) {
-      alert("Form submitted successfully!");
-      document.getElementById("leaveForm").reset();
-      document.getElementById("cl_balance").innerText = "-";
-      document.getElementById("sl_balance").innerText = "-";
-      document.getElementById("coff_balance").innerText = "-";
-      document.getElementById("total_balance").innerText = "-";
-      document.getElementById("error").innerText = "";
-    } else {
-      alert("Error submitting form.");
-    }
-  })
-  .catch(err => {
-    console.error(err);
-    alert("Error submitting form.");
   });
-});
+
+  document.getElementById("from_date").addEventListener("change", calculateLeaveDays);
+  document.getElementById("to_date").addEventListener("change", calculateLeaveDays);
+  document.getElementById("leave_type").addEventListener("change", calculateLeaveDays);
+
+  function calculateLeaveDays() {
+    const from = new Date(document.getElementById("from_date").value);
+    const to = new Date(document.getElementById("to_date").value);
+    const errorDiv = document.getElementById("error");
+
+    if (!isNaN(from) && !isNaN(to)) {
+      if (to < from) {
+        errorDiv.innerText = "TO DATE cannot be before FROM DATE.";
+        document.getElementById("leave_count").value = "";
+        return;
+      }
+
+      const diff = Math.ceil((to - from) / (1000 * 60 * 60 * 24)) + 1;
+      document.getElementById("leave_count").value = diff;
+
+      const type = document.getElementById("leave_type").value;
+      if (diff > leaveBalances[type]) {
+        errorDiv.innerText = `Insufficient balance for ${type}. Only ${leaveBalances[type]} available.`;
+      } else {
+        errorDiv.innerText = "";
+      }
+    }
+  }
+
+  document.getElementById("leaveForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const errorText = document.getElementById("error").innerText;
+    if (errorText) {
+      alert("Fix form errors first.");
+      return;
+    }
+
+    const form = document.getElementById("leaveForm");
+    const data = Object.fromEntries(new FormData(form).entries());
+
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: { "Content-Type": "application/json" }
+      });
+
+      const text = await res.text();
+      if (text.toLowerCase().includes("success")) {
+        alert("Form submitted successfully!");
+        form.reset();
+        document.getElementById("cl_balance").innerText = "-";
+        document.getElementById("sl_balance").innerText = "-";
+        document.getElementById("coff_balance").innerText = "-";
+        document.getElementById("total_balance").innerText = "-";
+        document.getElementById("error").innerText = "";
+      } else {
+        alert("Submission failed: " + text);
+      }
+    } catch (err) {
+      alert("Error submitting form: " + err.message);
+    }
+  });
 </script>
 
 </body>
