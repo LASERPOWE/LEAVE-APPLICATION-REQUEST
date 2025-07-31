@@ -70,168 +70,173 @@
   </style>
 </head>
 <body>
-  <video autoplay muted loop id="bgVideo">
-    <source src="https://laserpowerinfra.com/frontassets/img/slider/Banner_v04_HD_L.mp4" type="video/mp4">
-  </video>
-  <div class="overlay"></div>
 
-  <div class="form-container">
-    <h2>Leave Application Form</h2>
-    <form id="leaveForm">
-      <label>EMP_CODE (Enter manually)</label>
-      <input type="text" name="emp_code" id="emp_code" required>
+<video autoplay muted loop id="bgVideo">
+  <source src="https://laserpowerinfra.com/frontassets/img/slider/Banner_v04_HD_L.mp4" type="video/mp4">
+</video>
+<div class="overlay"></div>
 
-      <label>EMP_NAME</label>
-      <input type="text" id="emp_name" name="emp_name" readonly>
+<div class="form-container">
+  <h2>Leave Application Form</h2>
+  <form id="leaveForm">
+    <label>EMP_CODE (Enter manually)</label>
+    <input type="text" name="emp_code" id="emp_code" required>
 
-      <label>DESIG_NAME</label>
-      <input type="text" id="desig_name" name="desig_name" readonly>
+    <label>EMP_NAME</label>
+    <input type="text" id="emp_name" name="emp_name" readonly>
 
-      <label>DEPT_NAME</label>
-      <input type="text" id="dept_name" name="dept_name" readonly>
+    <label>DESIG_NAME</label>
+    <input type="text" id="desig_name" name="desig_name" readonly>
 
-      <label>HOD</label>
-      <input type="text" id="hod" name="hod" readonly>
+    <label>DEPT_NAME</label>
+    <input type="text" id="dept_name" name="dept_name" readonly>
 
-      <label>HOD MAIL</label>
-      <input type="text" id="hod_mail" name="hod_mail" readonly>
+    <label>HOD</label>
+    <input type="text" id="hod" name="hod" readonly>
 
-      <label>LEAVE TYPE</label>
-      <select name="leave_type" id="leave_type" required>
-        <option value="CL">CL</option>
-        <option value="SL">SL</option>
-        <option value="COFF">COFF</option>
-      </select>
+    <label>HOD MAIL</label>
+    <input type="text" id="hod_mail" name="hod_mail" readonly>
 
-      <div class="readonly-box">
-        <strong>CL Balance:</strong> <span id="cl_balance">-</span><br>
-        <strong>SL Balance:</strong> <span id="sl_balance">-</span><br>
-        <strong>COFF Balance:</strong> <span id="coff_balance">-</span><br>
-        <strong>Total Balance:</strong> <span id="total_balance">-</span>
-      </div>
+    <label>LEAVE TYPE</label>
+    <select name="leave_type" id="leave_type" required>
+      <option value="CL">CL</option>
+      <option value="SL">SL</option>
+      <option value="COFF">COFF</option>
+    </select>
 
-      <label>FROM DATE</label>
-      <input type="date" name="from_date" id="from_date" required>
+    <div class="readonly-box">
+      <strong>CL Balance:</strong> <span id="cl_balance">-</span><br>
+      <strong>SL Balance:</strong> <span id="sl_balance">-</span><br>
+      <strong>COFF Balance:</strong> <span id="coff_balance">-</span><br>
+      <strong>Total Balance:</strong> <span id="total_balance">-</span>
+    </div>
 
-      <label>TO DATE</label>
-      <input type="date" name="to_date" id="to_date" required>
+    <label>FROM DATE</label>
+    <input type="date" name="from_date" id="from_date" required>
 
-      <label>REASON</label>
-      <textarea name="reason" required></textarea>
+    <label>TO DATE</label>
+    <input type="date" name="to_date" id="to_date" required>
 
-      <label>TAKEN LEAVE COUNT</label>
-      <input type="number" id="taken_leave_count" name="taken_leave_count" readonly>
+    <label>REASON</label>
+    <textarea name="reason" required></textarea>
 
-      <div id="error"></div>
+    <label>TAKEN LEAVE COUNT</label>
+    <input type="number" id="taken_leave_count" name="leave_count" readonly>
 
-      <label>USER MAIL</label>
-      <input type="email" name="user_mail" required>
+    <div id="error"></div>
 
-      <button type="submit">Submit</button>
-    </form>
-  </div>
+    <label>USER MAIL</label>
+    <input type="email" name="user_mail" required>
 
-  <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbxZocX-f5G-3jL0v_wjQyy3stnRxOIjD7QkwWaUJgdz0xG6PL62EiS3EFTWu0SJFtdeGw/exec';
-    let leaveBalances = { CL: 0, SL: 0, COFF: 0 };
+    <button type="submit">Submit</button>
+  </form>
+</div>
 
-    document.getElementById('emp_code').addEventListener('blur', () => {
-      const empCode = document.getElementById('emp_code').value.trim();
-      if (!empCode) return;
+<script>
+  const originalScriptURL = "https://script.google.com/macros/s/AKfycbxZocX-f5G-3jL0v_wjQyy3stnRxOIjD7QkwWaUJgdz0xG6PL62EiS3EFTWu0SJFtdeGw/exec";
+  const proxyURL = "https://api.allorigins.win/raw?url=";
 
-      fetch(`${scriptURL}?emp_code=${empCode}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.found && data.employees.length > 0) {
-            const emp = data.employees[0];
-            document.getElementById('emp_name').value = emp.emp_name;
-            document.getElementById('desig_name').value = emp.desig_name;
-            document.getElementById('dept_name').value = emp.dept_name;
-            document.getElementById('hod').value = emp.hod;
-            document.getElementById('hod_mail').value = emp.hod_mail;
+  let leaveBalances = { CL: 0, SL: 0, COFF: 0 };
 
-            leaveBalances = {
-              CL: parseInt(emp.cl || 0),
-              SL: parseInt(emp.sl || 0),
-              COFF: parseInt(emp.coff || 0)
-            };
+  document.getElementById('emp_code').addEventListener('blur', () => {
+    const empCode = document.getElementById('emp_code').value.trim();
+    if (!empCode) return;
 
-            document.getElementById('cl_balance').innerText = leaveBalances.CL;
-            document.getElementById('sl_balance').innerText = leaveBalances.SL;
-            document.getElementById('coff_balance').innerText = leaveBalances.COFF;
-            document.getElementById('total_balance').innerText =
-              leaveBalances.CL + leaveBalances.SL + leaveBalances.COFF;
-          } else {
-            alert("Employee not found!");
-          }
-        })
-        .catch(() => alert("Error fetching employee data"));
-    });
+    fetch(`${proxyURL}${encodeURIComponent(originalScriptURL)}?emp_code=${empCode}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.found && data.employees.length > 0) {
+          const emp = data.employees[0];
+          document.getElementById('emp_name').value = emp.emp_name;
+          document.getElementById('desig_name').value = emp.desig_name;
+          document.getElementById('dept_name').value = emp.dept_name;
+          document.getElementById('hod').value = emp.hod;
+          document.getElementById('hod_mail').value = emp.hod_mail;
 
-    document.getElementById('from_date').addEventListener('change', calculateLeaveDays);
-    document.getElementById('to_date').addEventListener('change', calculateLeaveDays);
+          leaveBalances = {
+            CL: parseInt(emp.cl || 0),
+            SL: parseInt(emp.sl || 0),
+            COFF: parseInt(emp.coff || 0)
+          };
 
-    function calculateLeaveDays() {
-      const from = new Date(document.getElementById('from_date').value);
-      const to = new Date(document.getElementById('to_date').value);
-      const errorDiv = document.getElementById("error");
-
-      if (from && to && to >= from) {
-        const diff = Math.ceil((to - from) / (1000 * 60 * 60 * 24)) + 1;
-        document.getElementById('taken_leave_count').value = diff;
-
-        const selectedType = document.getElementById('leave_type').value;
-        if (selectedType && leaveBalances[selectedType] !== undefined) {
-          if (diff > leaveBalances[selectedType]) {
-            errorDiv.innerText = `Insufficient balance for ${selectedType}. Only ${leaveBalances[selectedType]} available.`;
-          } else {
-            errorDiv.innerText = '';
-          }
+          document.getElementById('cl_balance').innerText = leaveBalances.CL;
+          document.getElementById('sl_balance').innerText = leaveBalances.SL;
+          document.getElementById('coff_balance').innerText = leaveBalances.COFF;
+          document.getElementById('total_balance').innerText =
+            leaveBalances.CL + leaveBalances.SL + leaveBalances.COFF;
+        } else {
+          alert("Employee not found!");
         }
-      } else {
-        document.getElementById('taken_leave_count').value = '';
-        errorDiv.innerText = 'TO DATE cannot be before FROM DATE';
+      })
+      .catch(() => alert("Error fetching employee data"));
+  });
+
+  document.getElementById('from_date').addEventListener('change', calculateLeaveDays);
+  document.getElementById('to_date').addEventListener('change', calculateLeaveDays);
+
+  function calculateLeaveDays() {
+    const from = new Date(document.getElementById('from_date').value);
+    const to = new Date(document.getElementById('to_date').value);
+    const errorDiv = document.getElementById("error");
+
+    if (from && to && to >= from) {
+      const diff = Math.ceil((to - from) / (1000 * 60 * 60 * 24)) + 1;
+      document.getElementById('taken_leave_count').value = diff;
+
+      const selectedType = document.getElementById('leave_type').value;
+      if (selectedType && leaveBalances[selectedType] !== undefined) {
+        if (diff > leaveBalances[selectedType]) {
+          errorDiv.innerText = `Insufficient balance for ${selectedType}. Only ${leaveBalances[selectedType]} available.`;
+        } else {
+          errorDiv.innerText = '';
+        }
       }
+    } else {
+      document.getElementById('taken_leave_count').value = '';
+      errorDiv.innerText = 'TO DATE cannot be before FROM DATE';
+    }
+  }
+
+  document.getElementById('leave_type').addEventListener('change', calculateLeaveDays);
+
+  document.getElementById("leaveForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const errorText = document.getElementById("error").innerText;
+    if (errorText) {
+      alert("Cannot submit: " + errorText);
+      return;
     }
 
-    document.getElementById('leave_type').addEventListener('change', calculateLeaveDays);
+    const formData = Object.fromEntries(new FormData(this).entries());
 
-    document.getElementById("leaveForm").addEventListener("submit", function (e) {
-      e.preventDefault();
-      const errorText = document.getElementById("error").innerText;
-      if (errorText) {
-        alert("Cannot submit: " + errorText);
-        return;
+    fetch(`${proxyURL}${encodeURIComponent(originalScriptURL)}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(formData)
+    })
+    .then(response => response.text())
+    .then(result => {
+      if (result.includes("Success")) {
+        alert("Form submitted successfully!");
+        document.getElementById("leaveForm").reset();
+        document.getElementById("cl_balance").innerText = "-";
+        document.getElementById("sl_balance").innerText = "-";
+        document.getElementById("coff_balance").innerText = "-";
+        document.getElementById("total_balance").innerText = "-";
+        document.getElementById("error").innerText = "";
+      } else {
+        throw new Error(result);
       }
-
-      const formData = Object.fromEntries(new FormData(this).entries());
-      formData.leave_count = formData.taken_leave_count;
-      delete formData.taken_leave_count;
-
-      fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(scriptURL)}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
-      })
-      .then(response => response.text())
-      .then(result => {
-        if (result.includes("Success")) {
-          alert("Form submitted successfully!");
-          document.getElementById("leaveForm").reset();
-          document.getElementById("cl_balance").innerText = "-";
-          document.getElementById("sl_balance").innerText = "-";
-          document.getElementById("coff_balance").innerText = "-";
-          document.getElementById("total_balance").innerText = "-";
-          document.getElementById("error").innerText = "";
-        } else {
-          throw new Error(result);
-        }
-      })
-      .catch(error => {
-        console.error("Error submitting form:", error);
-        alert("Failed to submit form: " + error.message);
-      });
+    })
+    .catch(error => {
+      console.error("Error submitting form:", error);
+      alert("Failed to submit form: " + error.message);
     });
-  </script>
+  });
+</script>
+
 </body>
 </html>
