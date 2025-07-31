@@ -66,6 +66,7 @@
 
     <label>LEAVE TYPE</label>
     <select name="leave_type" id="leave_type" required>
+      <option value="">Select</option>
       <option value="CL">CL</option>
       <option value="SL">SL</option>
       <option value="COFF">COFF</option>
@@ -176,10 +177,18 @@
     }
 
     const formData = new FormData(this);
+    const plainData = new URLSearchParams();
+
+    for (const [key, value] of formData.entries()) {
+      plainData.append(key, value);
+    }
 
     fetch(scriptURL, {
       method: "POST",
-      body: formData
+      body: plainData,
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      }
     })
     .then(res => res.text())
     .then(response => {
