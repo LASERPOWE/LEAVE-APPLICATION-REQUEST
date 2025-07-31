@@ -2,70 +2,79 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Leave Application</title>
+  <title>Leave Application Form</title>
   <style>
-    body { font-family: Arial; background: #f0f0f0; padding: 20px; }
+    body { font-family: Arial; background: #f0f0f0; }
     .form-container {
-      background: #fff; padding: 20px;
-      max-width: 600px; margin: auto;
-      border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      max-width: 600px; margin: 50px auto; background: white;
+      padding: 30px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-    label { font-weight: bold; display: block; margin-top: 10px; }
     input, select, textarea {
-      width: 100%; padding: 8px; margin-top: 5px;
-      margin-bottom: 15px; box-sizing: border-box;
+      width: 100%; padding: 8px; margin-bottom: 12px;
     }
+    input[readonly] { background-color: #eee; }
+    label { font-weight: bold; display: block; margin-bottom: 4px; }
+    .readonly-box { background: #f9f9f9; padding: 10px; margin-bottom: 12px; }
+    #error { color: red; font-weight: bold; }
     button {
-      background: green; color: white;
-      padding: 10px 20px; border: none;
-      cursor: pointer;
+      background: green; color: white; padding: 10px 20px;
+      border: none; cursor: pointer;
     }
   </style>
 </head>
 <body>
 
 <div class="form-container">
-  <h2>Leave Application</h2>
+  <h2>Leave Application Form</h2>
   <form id="leaveForm">
     <label>EMP_CODE</label>
-    <input type="text" id="emp_code" required>
+    <input type="text" name="emp_code" id="emp_code" required>
 
     <label>EMP_NAME</label>
-    <input type="text" id="emp_name" readonly>
+    <input type="text" id="emp_name" name="emp_name" readonly>
 
     <label>DESIG_NAME</label>
-    <input type="text" id="desig_name" readonly>
+    <input type="text" id="desig_name" name="desig_name" readonly>
 
     <label>DEPT_NAME</label>
-    <input type="text" id="dept_name" readonly>
+    <input type="text" id="dept_name" name="dept_name" readonly>
 
     <label>HOD</label>
-    <input type="text" id="hod" readonly>
+    <input type="text" id="hod" name="hod" readonly>
 
     <label>HOD MAIL</label>
-    <input type="text" id="hod_mail" readonly>
+    <input type="text" id="hod_mail" name="hod_mail" readonly>
 
     <label>LEAVE TYPE</label>
-    <select id="leave_type" required>
+    <select name="leave_type" id="leave_type" required>
       <option value="CL">CL</option>
       <option value="SL">SL</option>
       <option value="COFF">COFF</option>
     </select>
 
+    <div class="readonly-box">
+      <strong>CL:</strong> <span id="cl_balance">-</span> |
+      <strong>SL:</strong> <span id="sl_balance">-</span> |
+      <strong>COFF:</strong> <span id="coff_balance">-</span> |
+      <strong>Total:</strong> <span id="total_balance">-</span>
+    </div>
+
     <label>FROM DATE</label>
-    <input type="date" id="from_date" required>
+    <input type="date" name="from_date" id="from_date" required>
 
     <label>TO DATE</label>
-    <input type="date" id="to_date" required>
+    <input type="date" name="to_date" id="to_date" required>
 
     <label>REASON</label>
-    <textarea id="reason" required></textarea>
+    <textarea name="reason" id="reason" required></textarea>
 
-    <label>LEAVE COUNT</label>
-    <input type="number" id="leave_count" readonly>
+    <label>TAKEN LEAVE COUNT</label>
+    <input type="number" id="taken_leave_count" name="taken_leave_count" readonly>
+
+    <div id="error"></div>
 
     <label>USER MAIL</label>
-    <input type="email" id="user_mail" required>
+    <input type="email" name="user_mail" id="user_mail" required>
 
     <button type="submit">Submit</button>
   </form>
@@ -73,9 +82,11 @@
 
 <script>
   const scriptURL = "https://script.google.com/macros/s/AKfycbyyxQHTox365NokMVO7ncaRFLQkfy-zLxz2OpzmeGTVr6e0GLIYWh_dXoZvZ3s7Iq87Pw/exec";
+  let leaveBalances = { CL: 0, SL: 0, COFF: 0 };
 
-  document.getElementById("emp_code").addEventListener("blur", () => {
-    const empCode = document.getElementById("emp_code").value.trim();
+  // Fetch employee data on blur
+  document.getElementById('emp_code').addEventListener('blur', () => {
+    const empCode = document.getElementById('emp_code').value.trim();
     if (!empCode) return;
 
     fetch(`${scriptURL}?emp_code=${empCode}`)
@@ -83,11 +94,23 @@
       .then(data => {
         if (data.found && data.employees.length > 0) {
           const emp = data.employees[0];
-          document.getElementById("emp_name").value = emp.emp_name || "";
-          document.getElementById("desig_name").value = emp.design_name || "";
-          document.getElementById("dept_name").value = emp.dept_name || "";
-          document.getElementById("hod").value = emp.hod || "";
-          document.getElementById("hod_mail").value = emp.hod_mail || "";
+          document.getElementById('emp_name').value = emp.emp_name || '';
+          document.getElementById('desig_name').value = emp.design_name || '';
+          document.getElementById('dept_name').value = emp.dept_name || '';
+          document.getElementById('hod').value = emp.hod || '';
+          document.getElementById('hod_mail').value = emp.hod_mail || '';
+
+          leaveBalances = {
+            CL: parseInt(emp.cl || 0),
+            SL: parseInt(emp.sl || 0),
+            COFF: parseInt(emp.coff || 0)
+          };
+
+          document.getElementById('cl_balance').innerText = leaveBalances.CL;
+          document.getElementById('sl_balance').innerText = leaveBalances.SL;
+          document.getElementById('coff_balance').innerText = leaveBalances.COFF;
+          document.getElementById('total_balance').innerText =
+            leaveBalances.CL + leaveBalances.SL + leaveBalances.COFF;
         } else {
           alert("Employee not found!");
         }
@@ -95,61 +118,77 @@
       .catch(err => alert("Failed to fetch employee data."));
   });
 
-  document.getElementById("from_date").addEventListener("change", updateLeaveCount);
-  document.getElementById("to_date").addEventListener("change", updateLeaveCount);
+  document.getElementById('from_date').addEventListener('change', calculateLeaveDays);
+  document.getElementById('to_date').addEventListener('change', calculateLeaveDays);
+  document.getElementById('leave_type').addEventListener('change', calculateLeaveDays);
 
-  function updateLeaveCount() {
-    const from = new Date(document.getElementById("from_date").value);
-    const to = new Date(document.getElementById("to_date").value);
+  function calculateLeaveDays() {
+    const from = new Date(document.getElementById('from_date').value);
+    const to = new Date(document.getElementById('to_date').value);
+    const errorDiv = document.getElementById("error");
+
     if (from && to && to >= from) {
       const diff = Math.ceil((to - from) / (1000 * 60 * 60 * 24)) + 1;
-      document.getElementById("leave_count").value = diff;
+      document.getElementById('taken_leave_count').value = diff;
+
+      const selectedType = document.getElementById('leave_type').value;
+      if (selectedType && leaveBalances[selectedType] !== undefined) {
+        if (diff > leaveBalances[selectedType]) {
+          errorDiv.innerText = `Insufficient balance for ${selectedType}. Only ${leaveBalances[selectedType]} available.`;
+        } else {
+          errorDiv.innerText = '';
+        }
+      }
     } else {
-      document.getElementById("leave_count").value = '';
+      document.getElementById('taken_leave_count').value = '';
+      errorDiv.innerText = '';
     }
   }
 
-  document.getElementById("leaveForm").addEventListener("submit", function(e) {
+  document.getElementById("leaveForm").addEventListener("submit", function (e) {
     e.preventDefault();
 
-    const payload = {
-      emp_code: document.getElementById("emp_code").value,
-      emp_name: document.getElementById("emp_name").value,
-      hod: document.getElementById("hod").value,
-      desig_name: document.getElementById("desig_name").value,
-      dept_name: document.getElementById("dept_name").value,
-      leave_type: document.getElementById("leave_type").value,
-      from_date: formatDate(document.getElementById("from_date").value),
-      to_date: formatDate(document.getElementById("to_date").value),
-      reason: document.getElementById("reason").value,
-      leave_count: Number(document.getElementById("leave_count").value),
-      hod_mail: document.getElementById("hod_mail").value,
-      user_mail: document.getElementById("user_mail").value
+    const errorText = document.getElementById("error").innerText;
+    if (errorText) {
+      alert("Cannot submit: " + errorText);
+      return;
+    }
+
+    const form = document.getElementById("leaveForm");
+    const jsonData = {
+      emp_code: form.emp_code.value,
+      emp_name: form.emp_name.value,
+      hod: form.hod.value,
+      desig_name: form.desig_name.value,
+      dept_name: form.dept_name.value,
+      leave_type: form.leave_type.value,
+      from_date: form.from_date.value,
+      to_date: form.to_date.value,
+      reason: form.reason.value,
+      leave_count: parseInt(form.taken_leave_count.value),
+      hod_mail: form.hod_mail.value,
+      user_mail: form.user_mail.value
     };
 
     fetch(scriptURL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(jsonData)
     })
     .then(res => res.text())
-    .then(data => {
+    .then(response => {
       alert("Form submitted successfully!");
       document.getElementById("leaveForm").reset();
+      document.getElementById("cl_balance").innerText = "-";
+      document.getElementById("sl_balance").innerText = "-";
+      document.getElementById("coff_balance").innerText = "-";
+      document.getElementById("total_balance").innerText = "-";
+      document.getElementById("error").innerText = "";
     })
     .catch(error => {
       alert("Submission failed.");
-      console.error(error);
     });
   });
-
-  function formatDate(dateStr) {
-    const date = new Date(dateStr);
-    const mm = String(date.getMonth() + 1).padStart(2, '0');
-    const dd = String(date.getDate()).padStart(2, '0');
-    const yyyy = date.getFullYear();
-    return `${mm}/${dd}/${yyyy}`;
-  }
 </script>
 
 </body>
