@@ -80,6 +80,15 @@
       color: red;
       text-align: center;
       margin-top: 10px;
+      font-weight: bold;
+    }
+
+    #leave-balance {
+      margin-bottom: 20px;
+      background-color: #f3f3f3;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 14px;
     }
 
     @media (max-width: 600px) {
@@ -98,6 +107,15 @@
 
   <div class="form-container">
     <h2>Leave Application Form</h2>
+
+    <!-- Leave Balance Section -->
+    <div id="leave-balance">
+      <strong>CL Balance:</strong> <span id="cl_balance">-</span><br>
+      <strong>SL Balance:</strong> <span id="sl_balance">-</span><br>
+      <strong>COFF Balance:</strong> <span id="coff_balance">-</span><br>
+      <strong>Total Balance:</strong> <span id="total_balance">-</span>
+    </div>
+
     <form id="leaveForm">
       <label>EMP_CODE:
         <input type="text" name="emp_code" id="emp_code" required />
@@ -175,6 +193,19 @@
             document.getElementById("design_name").value = emp.design_name;
             document.getElementById("dept_name").value = emp.dept_name;
             document.getElementById("hod_mail").value = emp.hod_mail;
+
+            // Set leave balances
+            document.getElementById("cl_balance").innerText = emp.cl || 0;
+            document.getElementById("sl_balance").innerText = emp.sl || 0;
+            document.getElementById("coff_balance").innerText = emp.coff || 0;
+            document.getElementById("total_balance").innerText = emp.total_leave || 0;
+
+            // Store balances in form dataset
+            const form = document.getElementById("leaveForm");
+            form.dataset.cl = emp.cl || 0;
+            form.dataset.sl = emp.sl || 0;
+            form.dataset.coff = emp.coff || 0;
+
           } else {
             alert("Employee not found.");
           }
@@ -185,17 +216,37 @@
     function calculateLeave() {
       const from = new Date(document.getElementById("from_date").value);
       const to = new Date(document.getElementById("to_date").value);
+      const error = document.getElementById("error");
+
+      if (isNaN(from.getTime()) || isNaN(to.getTime())) return;
+
       if (to < from) {
-        document.getElementById("error").innerText = "TO DATE cannot be before FROM DATE";
+        error.innerText = "TO DATE cannot be before FROM DATE";
+        document.getElementById("taken_leave_count").value = "";
         return;
       }
-      const diff = (to - from) / (1000 * 60 * 60 * 24) + 1;
-      document.getElementById("taken_leave_count").value = diff;
-      document.getElementById("error").innerText = "";
+
+      const days = (to - from) / (1000 * 60 * 60 * 24) + 1;
+      document.getElementById("taken_leave_count").value = days;
+
+      const leaveType = document.getElementById("leave_type").value;
+      const form = document.getElementById("leaveForm");
+      let balance = 0;
+
+      if (leaveType === "CL") balance = parseFloat(form.dataset.cl || 0);
+      else if (leaveType === "SL") balance = parseFloat(form.dataset.sl || 0);
+      else if (leaveType === "COFF") balance = parseFloat(form.dataset.coff || 0);
+
+      if (leaveType && days > balance) {
+        error.innerText = `Insufficient ${leaveType} balance. Available: ${balance}`;
+      } else {
+        error.innerText = "";
+      }
     }
 
     document.getElementById("from_date").addEventListener("change", calculateLeave);
     document.getElementById("to_date").addEventListener("change", calculateLeave);
+    document.getElementById("leave_type").addEventListener("change", calculateLeave);
 
     document.getElementById("leaveForm").addEventListener("submit", function (e) {
       e.preventDefault();
@@ -214,11 +265,16 @@
         .then(msg => {
           alert(msg);
           this.reset();
+          document.getElementById("cl_balance").innerText = "-";
+          document.getElementById("sl_balance").innerText = "-";
+          document.getElementById("coff_balance").innerText = "-";
+          document.getElementById("total_balance").innerText = "-";
         })
         .catch(err => {
           alert("Submission failed: " + err.message);
         });
     });
   </script>
+
 </body>
 </html>
