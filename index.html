@@ -1,35 +1,162 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Leave Application Form</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: auto;
+    }
+
+    video#bg-video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      min-width: 100vw;
+      min-height: 100vh;
+      z-index: -1;
+      object-fit: cover;
+      opacity: 0.5;
+    }
+
+    .form-container {
+      max-width: 600px;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 30px;
+      margin: 50px auto;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 12px;
+      font-weight: 500;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    input[readonly] {
+      background-color: #f9f9f9;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #1e88e5;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+
+    button:hover {
+      background-color: #1565c0;
+    }
+
+    #error {
+      color: red;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 600px) {
+      .form-container {
+        margin: 20px;
+        padding: 20px;
+      }
+    }
+  </style>
 </head>
 <body>
-  <h2>Leave Application Form</h2>
-  <form id="leaveForm">
-    <label>EMP_CODE: <input type="text" name="emp_code" id="emp_code" required></label><br>
-    <label>EMP_NAME: <input type="text" name="emp_name" id="emp_name" readonly></label><br>
-    <label>HOD: <input type="text" name="hod" id="hod" readonly></label><br>
-    <label>DESIG_NAME: <input type="text" name="design_name" id="design_name" readonly></label><br>
-    <label>DEPT_NAME: <input type="text" name="dept_name" id="dept_name" readonly></label><br>
-    <label>LEAVE TYPE:
-      <select name="leave_type" id="leave_type" required>
-        <option value="">--Select--</option>
-        <option value="CL">CL</option>
-        <option value="SL">SL</option>
-        <option value="COFF">COFF</option>
-      </select>
-    </label><br>
-    <label>FROM DATE: <input type="date" name="from_date" id="from_date" required></label><br>
-    <label>TO DATE: <input type="date" name="to_date" id="to_date" required></label><br>
-    <label>REASON: <input type="text" name="reason" id="reason" required></label><br>
-    <label>TAKEN LEAVE COUNT: <input type="number" name="taken_leave_count" id="taken_leave_count" readonly></label><br>
-    <label>HOD MAIL ID: <input type="email" name="hod_mail" id="hod_mail" readonly></label><br>
-    <label>USER MAIL: <input type="email" name="user_mail" id="user_mail" required></label><br><br>
-    <button type="submit">Submit</button>
-  </form>
 
-  <p id="error" style="color:red;"></p>
+  <video autoplay muted loop id="bg-video">
+    <source src="https://laserpowerinfra.com/frontassets/img/slider/Banner_v04_HD_L.mp4" type="video/mp4">
+  </video>
+
+  <div class="form-container">
+    <h2>Leave Application Form</h2>
+    <form id="leaveForm">
+      <label>EMP_CODE:
+        <input type="text" name="emp_code" id="emp_code" required />
+      </label>
+
+      <label>EMP_NAME:
+        <input type="text" name="emp_name" id="emp_name" readonly />
+      </label>
+
+      <label>HOD:
+        <input type="text" name="hod" id="hod" readonly />
+      </label>
+
+      <label>DESIG_NAME:
+        <input type="text" name="design_name" id="design_name" readonly />
+      </label>
+
+      <label>DEPT_NAME:
+        <input type="text" name="dept_name" id="dept_name" readonly />
+      </label>
+
+      <label>LEAVE TYPE:
+        <select name="leave_type" id="leave_type" required>
+          <option value="">--Select--</option>
+          <option value="CL">CL</option>
+          <option value="SL">SL</option>
+          <option value="COFF">COFF</option>
+        </select>
+      </label>
+
+      <label>FROM DATE:
+        <input type="date" name="from_date" id="from_date" required />
+      </label>
+
+      <label>TO DATE:
+        <input type="date" name="to_date" id="to_date" required />
+      </label>
+
+      <label>REASON:
+        <input type="text" name="reason" id="reason" required />
+      </label>
+
+      <label>TAKEN LEAVE COUNT:
+        <input type="number" name="taken_leave_count" id="taken_leave_count" readonly />
+      </label>
+
+      <label>HOD MAIL ID:
+        <input type="email" name="hod_mail" id="hod_mail" readonly />
+      </label>
+
+      <label>USER MAIL:
+        <input type="email" name="user_mail" id="user_mail" required />
+      </label>
+
+      <p id="error"></p>
+
+      <button type="submit">Submit</button>
+    </form>
+  </div>
 
   <script>
     const scriptURL = 'https://script.google.com/macros/s/AKfycbw98lNUp42hvEA-yOTI96At0wDlqhw9yX8oALIjrh13H6RWnmIEgS9LE87ScJ2AT8GvjA/exec';
@@ -55,9 +182,6 @@
         .catch(err => alert("Fetch failed: " + err.message));
     });
 
-    document.getElementById("from_date").addEventListener("change", calculateLeave);
-    document.getElementById("to_date").addEventListener("change", calculateLeave);
-
     function calculateLeave() {
       const from = new Date(document.getElementById("from_date").value);
       const to = new Date(document.getElementById("to_date").value);
@@ -69,6 +193,9 @@
       document.getElementById("taken_leave_count").value = diff;
       document.getElementById("error").innerText = "";
     }
+
+    document.getElementById("from_date").addEventListener("change", calculateLeave);
+    document.getElementById("to_date").addEventListener("change", calculateLeave);
 
     document.getElementById("leaveForm").addEventListener("submit", function (e) {
       e.preventDefault();
