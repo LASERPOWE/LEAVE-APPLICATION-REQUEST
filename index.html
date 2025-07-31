@@ -1,25 +1,23 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Leave Application Form</title>
   <style>
-    /* Your existing styles (same as above) */
-    html, body {
+    body, html {
       margin: 0;
       padding: 0;
-      height: 100%;
       font-family: Arial, sans-serif;
     }
 
-    #bgVideo {
+    video#bgVideo {
       position: fixed;
-      top: 0;
-      left: 0;
+      right: 0;
+      bottom: 0;
       min-width: 100%;
       min-height: 100%;
-      object-fit: cover;
       z-index: -2;
+      object-fit: cover;
     }
 
     .overlay {
@@ -28,39 +26,37 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.4);
+      background: rgba(0, 0, 0, 0.5);
       z-index: -1;
     }
 
     .form-container {
-      position: relative;
-      z-index: 1;
-      max-width: 600px;
       background: rgba(255, 255, 255, 0.95);
-      margin: 40px auto;
+      margin: 60px auto;
       padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px #00000033;
-      background-image: url('https://laserpowerinfra.com/frontassets/front/images/final-loader.gif');
-      background-repeat: no-repeat;
-      background-position: center;
-      background-size: 200px auto;
-      background-blend-mode: lighten;
+      max-width: 600px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px #0003;
     }
 
     input, select, textarea {
       width: 100%;
       padding: 8px;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       box-sizing: border-box;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: green;
+      color: white;
+      border: none;
+      cursor: pointer;
     }
 
     label {
       font-weight: bold;
-    }
-
-    input[readonly] {
-      background-color: #f0f0f0;
     }
 
     .readonly-box {
@@ -73,23 +69,12 @@
       color: red;
       font-weight: bold;
     }
-
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      background: #28a745;
-      color: white;
-      border: none;
-    }
   </style>
 </head>
 <body>
 
-  <!-- Background Video -->
   <video autoplay muted loop id="bgVideo">
     <source src="https://laserpowerinfra.com/frontassets/img/slider/Banner_v04_HD_L.mp4" type="video/mp4">
-    Your browser does not support the video tag.
   </video>
 
   <div class="overlay"></div>
@@ -139,10 +124,11 @@
       <textarea name="reason" required></textarea>
 
       <label>TAKEN LEAVE COUNT</label>
-      <input type="number" id="taken_leave_count" name="taken_leave_count" readonly>
+      <input type="number" id="taken_leave_count" name="leave_count" readonly>
+
       <div id="error"></div>
 
-      <label>USER MAIL (Enter manually)</label>
+      <label>USER MAIL</label>
       <input type="email" name="user_mail" required>
 
       <button type="submit">Submit</button>
@@ -150,17 +136,19 @@
   </div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbxsw079DfsxyRkXbQF_z1LB2wgreA4lT0giSngSz3YJQLjMuZzxksWFB_f_9WDSPxi6/exec";
+    const scriptURL = "https://script.google.com/macros/s/AKfycby4fCr8tZTN63ypNxGUeparjkR8BhAYwNRde_LaZ-7XafTPKABGWagdEza8YoPOrrWuUA/exec";
+
     let leaveBalances = { CL: 0, SL: 0, COFF: 0 };
 
     document.getElementById('emp_code').addEventListener('blur', () => {
       const empCode = document.getElementById('emp_code').value.trim();
       if (!empCode) return;
 
-      fetch(`${API_URL}?emp_code=${encodeURIComponent(empCode)}`)
+      fetch(`${scriptURL}?emp_code=${empCode}`)
         .then(res => res.json())
-        .then(data => {
-          if (data && data.emp_name) {
+        .then(response => {
+          if (response.found && response.employees.length > 0) {
+            const data = response.employees[0];
             document.getElementById('emp_name').value = data.emp_name;
             document.getElementById('desig_name').value = data.desig_name;
             document.getElementById('dept_name').value = data.dept_name;
@@ -178,13 +166,14 @@
             document.getElementById('coff_balance').innerText = leaveBalances.COFF;
             document.getElementById('total_balance').innerText =
               leaveBalances.CL + leaveBalances.SL + leaveBalances.COFF;
+
           } else {
-            alert("Employee not found!");
+            alert("Employee not found");
           }
         })
         .catch(err => {
-          console.error(err);
           alert("Error fetching employee data.");
+          console.error(err);
         });
     });
 
@@ -223,10 +212,14 @@
         return;
       }
 
-      const formData = new FormData(this);
-      fetch(API_URL, {
-        method: "POST",
-        body: formData
+      const formData = Object.fromEntries(new FormData(this).entries());
+
+      fetch(scriptURL, {
+        method: 'POST',
+        body: JSON.stringify(formData),
+        headers: {
+          'Content-Type': 'application/json',
+        }
       })
         .then(res => res.text())
         .then(response => {
@@ -236,13 +229,13 @@
           document.getElementById("sl_balance").innerText = "-";
           document.getElementById("coff_balance").innerText = "-";
           document.getElementById("total_balance").innerText = "-";
-          document.getElementById("error").innerText = "";
         })
         .catch(err => {
+          alert("Submission failed.");
           console.error(err);
-          alert("Error submitting form.");
         });
     });
   </script>
+
 </body>
 </html>
