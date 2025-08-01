@@ -4,64 +4,162 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Leave Application Form</title>
+
+  <!-- Google Sign-In script -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script>
+    window.onload = function () {
+      google.accounts.id.initialize({
+        client_id: "995677134206-i3n2k43cvsr48ngjb6t69s7tsr0sivpj.apps.googleusercontent.com",
+        callback: handleCredentialResponse
+      });
+      google.accounts.id.prompt(); // Show one-tap sign-in
+    };
+
+    function handleCredentialResponse(response) {
+      const decoded = parseJwt(response.credential);
+      const email = decoded.email;
+      if (email) {
+        document.getElementById("user_mail").value = email;
+      }
+    }
+
+    function parseJwt(token) {
+      const base64Url = token.split('.')[1];
+      const base64 = decodeURIComponent(atob(base64Url).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      return JSON.parse(base64);
+    }
+  </script>
+
   <style>
-    /* Styles same as pehle wale code mein hain — clean layout, background video, modal, spinner */
-    * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-    body, html { margin: 0; padding: 0; height: 100%; }
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+
     video#bg-video {
-      position: fixed; top: 0; left: 0;
-      min-width: 100vw; min-height: 100vh;
-      z-index: -1; object-fit: cover; opacity: 0.5;
+      position: fixed;
+      top: 0;
+      left: 0;
+      min-width: 100vw;
+      min-height: 100vh;
+      z-index: -1;
+      object-fit: cover;
+      opacity: 0.5;
     }
+
     .form-container {
-      max-width: 600px; background: rgba(255,255,255,0.95);
-      padding: 30px; margin: 50px auto;
-      border-radius: 12px; box-shadow: 0 0 15px rgba(0,0,0,0.3);
+      max-width: 600px;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 30px;
+      margin: 50px auto;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
     }
-    h2 { text-align: center; }
-    label { display: block; margin-bottom: 12px; font-weight: 500; }
+
+    h2 {
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 12px;
+      font-weight: 500;
+    }
+
     input, select {
-      width: 100%; padding: 10px; margin-top: 5px;
-      border: 1px solid #ccc; border-radius: 8px;
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
     }
-    input[readonly] { background-color: #f9f9f9; }
+
+    input[readonly] {
+      background-color: #f9f9f9;
+    }
+
     button {
-      width: 100%; padding: 12px; background-color: #1e88e5;
-      color: white; border: none; border-radius: 8px;
-      font-size: 16px; cursor: pointer; margin-top: 15px;
+      width: 100%;
+      padding: 12px;
+      background-color: #1e88e5;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 15px;
     }
-    button:hover { background-color: #1565c0; }
-    #error { color: red; text-align: center; margin-top: 10px; }
+
+    button:hover {
+      background-color: #1565c0;
+    }
+
+    #error {
+      color: red;
+      text-align: center;
+      margin-top: 10px;
+    }
+
     .balance-info {
-      margin: 10px 0; padding: 10px;
-      background-color: #f1f1f1; border-radius: 8px;
+      margin: 10px 0;
+      padding: 10px;
+      background-color: #f1f1f1;
+      border-radius: 8px;
       font-weight: bold;
     }
+
     #loading {
-      position: fixed; top: 0; left: 0;
+      position: fixed;
+      top: 0; left: 0;
       width: 100%; height: 100%;
       background-color: rgba(0,0,0,0.6);
-      z-index: 999; display: none;
-      align-items: center; justify-content: center;
-      color: white; font-size: 24px;
+      z-index: 999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
     }
+
     #confirmModal {
-      position: fixed; top: 0; left: 0;
+      position: fixed;
+      top: 0; left: 0;
       width: 100%; height: 100%;
-      background: rgba(0,0,0,0.6);
-      display: none; z-index: 1000;
-      justify-content: center; align-items: center;
+      background: rgba(0, 0, 0, 0.6);
+      display: none;
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
     }
+
     #confirmBox {
-      background: white; padding: 20px;
-      border-radius: 10px; text-align: center;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
     }
-    #confirmBox button { margin: 10px; width: auto; }
+
+    #confirmBox button {
+      margin: 10px;
+      width: auto;
+    }
+
     @media (max-width: 600px) {
-      .form-container { margin: 20px; padding: 20px; }
+      .form-container {
+        margin: 20px;
+        padding: 20px;
+      }
     }
   </style>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
   <video autoplay muted loop id="bg-video">
@@ -139,7 +237,7 @@
       </label>
 
       <label>USER MAIL:
-        <input type="email" name="user_mail" id="user_mail" required />
+        <input type="email" name="user_mail" id="user_mail" required readonly />
       </label>
 
       <p id="error"></p>
@@ -154,12 +252,11 @@
     const loading = document.getElementById("loading");
     const confirmModal = document.getElementById("confirmModal");
 
-    // EMP_CODE change par data fetch
     document.getElementById("emp_code").addEventListener("change", function () {
       const empCode = this.value.trim();
       if (!empCode) return;
-      loading.style.display = "flex";
 
+      loading.style.display = "flex";
       fetch(`${scriptURL}?emp_code=${empCode}`)
         .then(res => res.json())
         .then(data => {
@@ -214,7 +311,6 @@
     form.to_date.addEventListener("change", calculateLeave);
     form.leave_type.addEventListener("change", calculateLeave);
 
-    // Submit with confirmation modal
     form.addEventListener("submit", function (e) {
       e.preventDefault();
       if (document.getElementById("error").innerText) {
@@ -237,7 +333,7 @@
         .then(res => res.text())
         .then(msg => {
           alert(msg);
-          const mailto = `mailto:${form.hod_mail.value}?subject=Leave Approval Request&body=Please approve or reject the leave request for ${form.emp_name.value} (${form.emp_code.value}) from ${form.from_date.value} to ${form.to_date.value}%0A%0A[Approve]%0A[Reject]`;
+          const mailto = `mailto:${form.hod_mail.value}?subject=Leave Approval Request&body=Please approve or reject the leave request for ${form.emp_name.value} (${form.emp_code.value}) from ${form.from_date.value} to ${form.to_date.value} (%0A)%0A[Approve]%0A[Reject]`;
           window.open(mailto);
           form.reset();
           document.getElementById("cl_balance").innerText = "-";
@@ -251,19 +347,6 @@
 
     document.getElementById("confirmNo").onclick = () => {
       confirmModal.style.display = "none";
-    };
-
-    // 🟢 Google Sign-In for auto user mail
-    window.onload = () => {
-      google.accounts.id.initialize({
-        client_id: "995677134206-i3n2k43cvsr48ngjb6t69s7tsr0sivpj.apps.googleusercontent.com",
-        callback: (response) => {
-          const idToken = response.credential;
-          const payload = JSON.parse(atob(idToken.split('.')[1]));
-          form.user_mail.value = payload.email;
-        }
-      });
-      google.accounts.id.prompt();
     };
   </script>
 </body>
