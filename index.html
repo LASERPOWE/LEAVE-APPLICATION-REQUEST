@@ -1,301 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Leave Application Form</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      font-family: 'Segoe UI', sans-serif;
-    }
-
-    body, html {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      overflow: auto;
-    }
-
-    video#bg-video {
-      position: fixed;
-      top: 0;
-      left: 0;
-      min-width: 100vw;
-      min-height: 100vh;
-      z-index: -1;
-      object-fit: cover;
-      opacity: 0.5;
-    }
-
-    .form-container {
-      max-width: 600px;
-      background: rgba(255, 255, 255, 0.95);
-      padding: 30px;
-      margin: 50px auto;
-      border-radius: 12px;
-      box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
-    }
-
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 12px;
-      font-weight: 500;
-    }
-
-    input, select {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-    }
-
-    input[readonly] {
-      background-color: #f9f9f9;
-    }
-
-    button {
-      width: 100%;
-      padding: 12px;
-      background-color: #1e88e5;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-      margin-top: 15px;
-    }
-
-    button:hover {
-      background-color: #1565c0;
-    }
-
-    #error {
-      color: red;
-      text-align: center;
-      margin-top: 10px;
-    }
-
-    .balance-info {
-      margin: 10px 0;
-      padding: 10px;
-      background-color: #f1f1f1;
-      border-radius: 8px;
-      font-weight: bold;
-    }
-
-    @media (max-width: 600px) {
-      .form-container {
-        margin: 20px;
-        padding: 20px;
-      }
-    }
-  </style>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>/* same CSS as before */</style>
 </head>
 <body>
 
-  <video autoplay muted loop id="bg-video">
-    <source src="https://laserpowerinfra.com/frontassets/img/slider/Banner_v04_HD_L.mp4" type="video/mp4">
-  </video>
+<video autoplay muted loop id="bg-video">
+  <source src="https://laserpowerinfra.com/frontassets/img/slider/Banner_v04_HD_L.mp4" type="video/mp4">
+</video>
 
-  <div class="form-container">
-    <h2>Leave Application Form</h2>
+<div class="form-container">
+  <h2>Leave Application Form</h2>
+  <div class="balance-info">CL: <span id="cl_balance">‑</span> | SL: <span id="sl_balance">‑</span> | COFF: <span id="coff_balance">‑</span> | Total: <span id="total_balance">‑</span></div>
+  <form id="leaveForm">
+    <!-- all your form fields -->
+    <label>USER MAIL: <input type="email" id="user_mail" name="user_mail" readonly required></label>
+    <p id="error"></p>
+    <button id="submitBtn" type="submit">Submit</button>
+  </form>
+</div>
 
-    <div class="balance-info">
-      CL Balance: <span id="cl_balance">-</span> |
-      SL Balance: <span id="sl_balance">-</span> |
-      COFF Balance: <span id="coff_balance">-</span> |
-      Total Balance: <span id="total_balance">-</span>
-    </div>
+<div class="loading-overlay" id="loadingOverlay"><div class="spinner"></div></div>
+<div class="modal" id="confirmationModal"><div class="modal-content">
+  <p>Are you sure you want to submit this leave request?</p>
+  <button id="confirmYes">Yes</button>
+  <button id="confirmNo">Cancel</button>
+</div></div>
 
-    <form id="leaveForm">
-      <label>EMP_CODE:
-        <input type="text" name="emp_code" id="emp_code" required />
-      </label>
+<script>
+  const scriptURL = 'YOUR_APP_SCRIPT_URL';
+  const form = document.getElementById("leaveForm"),
+        modal = document.getElementById("confirmationModal"),
+        loading = document.getElementById("loadingOverlay"),
+        error = document.getElementById("error"),
+        submitBtn = document.getElementById("submitBtn");
 
-      <label>EMP_NAME:
-        <input type="text" name="emp_name" id="emp_name" readonly />
-      </label>
-
-      <label>HOD:
-        <input type="text" name="hod" id="hod" readonly />
-      </label>
-
-      <label>DESIG_NAME:
-        <input type="text" name="design_name" id="design_name" readonly />
-      </label>
-
-      <label>DEPT_NAME:
-        <input type="text" name="dept_name" id="dept_name" readonly />
-      </label>
-
-      <label>LEAVE TYPE:
-        <select name="leave_type" id="leave_type" required>
-          <option value="">--Select--</option>
-          <option value="CL">CL</option>
-          <option value="SL">SL</option>
-          <option value="COFF">COFF</option>
-        </select>
-      </label>
-
-      <label>FROM DATE:
-        <input type="date" name="from_date" id="from_date" required />
-      </label>
-
-      <label>TO DATE:
-        <input type="date" name="to_date" id="to_date" required />
-      </label>
-
-      <label>REASON:
-        <input type="text" name="reason" id="reason" required />
-      </label>
-
-      <label>TAKEN LEAVE COUNT:
-        <input type="number" name="taken_leave_count" id="taken_leave_count" readonly />
-      </label>
-
-      <label>HOD MAIL ID:
-        <input type="email" name="hod_mail" id="hod_mail" readonly />
-      </label>
-
-      <label>USER MAIL:
-        <input type="email" name="user_mail" id="user_mail" required />
-      </label>
-
-      <p id="error"></p>
-
-      <button type="submit">Submit</button>
-    </form>
-  </div>
-
-  <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbw98lNUp42hvEA-yOTI96At0wDlqhw9yX8oALIjrh13H6RWnmIEgS9LE87ScJ2AT8GvjA/exec';
-
-    const empCodeInput = document.getElementById("emp_code");
-    const submitBtn = document.querySelector("button[type='submit']");
-    const error = document.getElementById("error");
-    const form = document.getElementById("leaveForm");
-
-    empCodeInput.addEventListener("change", function () {
-      const empCode = this.value.trim();
-      if (!empCode) return;
-
-      empCodeInput.disabled = true;
-      error.innerText = "Fetching data...";
-
-      const timeout = setTimeout(() => {
-        error.innerText = "Request timeout. Please check your internet.";
-        empCodeInput.disabled = false;
-      }, 10000);
-
-      fetch(`${scriptURL}?emp_code=${empCode}`)
-        .then(res => res.json())
-        .then(data => {
-          clearTimeout(timeout);
-          empCodeInput.disabled = false;
-          if (data.found) {
-            const emp = data.employees[0];
-            document.getElementById("emp_name").value = emp.emp_name;
-            document.getElementById("hod").value = emp.hod;
-            document.getElementById("design_name").value = emp.design_name;
-            document.getElementById("dept_name").value = emp.dept_name;
-            document.getElementById("hod_mail").value = emp.hod_mail;
-
-            // Set leave balances
-            document.getElementById("cl_balance").innerText = emp.cl || 0;
-            document.getElementById("sl_balance").innerText = emp.sl || 0;
-            document.getElementById("coff_balance").innerText = emp.coff || 0;
-            document.getElementById("total_balance").innerText = emp.total_leave || 0;
-
-            form.dataset.cl = emp.cl || 0;
-            form.dataset.sl = emp.sl || 0;
-            form.dataset.coff = emp.coff || 0;
-
-            error.innerText = "";
-          } else {
-            error.innerText = "Employee not found.";
-          }
-        })
-        .catch(err => {
-          clearTimeout(timeout);
-          error.innerText = "Error: " + err.message;
-          empCodeInput.disabled = false;
-        });
+  // GOOGLE SIGN‑IN INIT
+  window.onload = () => {
+    google.accounts.id.initialize({
+      client_id: 'YOUR_GOOGLE_CLIENT_ID',
+      callback: credentialResponse => {
+        // Send credentialResponse.credential to verify and decode email...
+        const payload = JSON.parse(atob(credentialResponse.credential.split('.')[1]));
+        document.getElementById("user_mail").value = payload.email;
+      }
     });
+    google.accounts.id.prompt();
+  };
 
-    function calculateLeave() {
-      const from = new Date(document.getElementById("from_date").value);
-      const to = new Date(document.getElementById("to_date").value);
-      const leaveType = document.getElementById("leave_type").value;
+  // FETCH EMPLOYEE & BALANCE
+  document.getElementById("emp_code").onchange = function(){
+    const val = this.value.trim(); if(!val) return;
+    loading.style.display = "flex";
+    fetch(`${scriptURL}?emp_code=${val}`)
+      .then(r=>r.json()).then(data=>{
+        loading.style.display="none";
+        if(data.found){
+          const emp = data.employees[0];
+          ["emp_name","hod","design_name","dept_name","hod_mail"].forEach(k=>document.getElementById(k).value = emp[k]||"");
+          ["cl","sl","coff","total_leave"].forEach(k=>document.getElementById(k+"_balance").innerText = emp[k]||0);
+          form.dataset.cl=emp.cl||0; form.dataset.sl=emp.sl||0; form.dataset.coff=emp.coff||0;
+        } else alert("Employee not found");
+      }).catch(e=>{loading.style.display="none"; alert("Error: "+e.message)});
+  };
 
-      if (isNaN(from.getTime()) || isNaN(to.getTime())) return;
-
-      if (to < from) {
-        error.innerText = "TO DATE cannot be before FROM DATE";
-        document.getElementById("taken_leave_count").value = "";
-        return;
-      }
-
-      const days = (to - from) / (1000 * 60 * 60 * 24) + 1;
-      document.getElementById("taken_leave_count").value = days;
-
-      let balance = 0;
-      if (leaveType === "CL") balance = parseFloat(form.dataset.cl || 0);
-      else if (leaveType === "SL") balance = parseFloat(form.dataset.sl || 0);
-      else if (leaveType === "COFF") balance = parseFloat(form.dataset.coff || 0);
-
-      if (leaveType && days > balance) {
-        error.innerText = `Insufficient ${leaveType} balance. Available: ${balance}`;
-      } else {
-        error.innerText = "";
-      }
-    }
-
-    document.getElementById("from_date").addEventListener("change", calculateLeave);
-    document.getElementById("to_date").addEventListener("change", calculateLeave);
-    document.getElementById("leave_type").addEventListener("change", calculateLeave);
-
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
-      if (error.innerText) {
-        alert("Fix errors before submitting.");
-        return;
-      }
-
-      submitBtn.disabled = true;
-      submitBtn.innerText = "Submitting...";
-
-      const formData = new FormData(form);
-
-      fetch(scriptURL, {
-        method: "POST",
-        body: formData
-      })
-        .then(res => res.text())
-        .then(msg => {
-          alert(msg);
-          form.reset();
-          document.getElementById("cl_balance").innerText = "-";
-          document.getElementById("sl_balance").innerText = "-";
-          document.getElementById("coff_balance").innerText = "-";
-          document.getElementById("total_balance").innerText = "-";
-          error.innerText = "";
-        })
-        .catch(err => {
-          alert("Submission failed: " + err.message);
-        })
-        .finally(() => {
-          submitBtn.disabled = false;
-          submitBtn.innerText = "Submit";
-        });
+  // LEAVE CALCULATION & VALIDATION
+  ["from_date","to_date","leave_type"].forEach(id=>{
+    document.getElementById(id).addEventListener('change', ()=> {
+      const from=new Date(form.from_date.value), to=new Date(form.to_date.value), lt=form.leave_type.value;
+      if(to<from){error.innerText="TO DATE cannot be before FROM DATE"; form.taken_leave_count.value=""; return;}
+      const days = Math.floor((to-from)/(1000*60*60*24))+1;
+      form.taken_leave_count.value=days;
+      const bal = parseFloat(form.dataset[lt.toLowerCase()]||0);
+      error.innerText = (lt && days>bal) ? `Insufficient ${lt} balance (${bal})` : "";
     });
-  </script>
+  });
+
+  // SUBMIT → POPUP
+  form.onsubmit = e=>{ e.preventDefault(); error.innerText?alert("Fix errors") : modal.style.display="flex"; };
+
+  document.getElementById("confirmNo").onclick = ()=> modal.style.display="none";
+
+  document.getElementById("confirmYes").onclick = () => {
+    modal.style.display="none";
+    loading.style.display="flex";
+    const formData = new FormData(form);
+    fetch(scriptURL, {method:"POST",body:formData})
+      .then(r=>r.text()).then(msg=>{
+        loading.style.display="none";
+        alert(msg);
+        generateMailto(form);
+        form.reset();
+      }).catch(e=>{loading.style.display="none"; alert("Submit failed: "+e.message)})
+      .finally(()=>{submitBtn.disabled=false; submitBtn.innerText="Submit"});
+    submitBtn.disabled=true; submitBtn.innerText="Submitting...";
+  };
+
+  // CREATE MAILTO LINK TO HOD
+  function generateMailto(frm){
+    const hod=frm.hod_mail.value, emp=frm.emp_name.value, lt=frm.leave_type.value,
+          from=frm.from_date.value, to=frm.to_date.value, days=frm.taken_leave_count.value;
+    const subject = `Leave Approval Request for ${emp}`,
+          body = `
+Dear ${frm.hod.value},
+
+Please approve the leave request for ${emp}:
+
+Type: ${lt}
+From: ${from}
+To: ${to}
+Days: ${days}
+
+Approve: https://script.google.com/macros/s/.../exec?action=approve&emp_code=${frm.emp_code.value}
+Reject: https://script.google.com/macros/s/.../exec?action=reject&emp_code=${frm.emp_code.value}
+
+Thank you.`;
+    window.location.href = `mailto:${hod}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  }
+</script>
 
 </body>
 </html>
