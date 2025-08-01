@@ -14,7 +14,6 @@
       margin: 0;
       padding: 0;
       height: 100%;
-      overflow: auto;
     }
 
     video#bg-video {
@@ -39,7 +38,6 @@
 
     h2 {
       text-align: center;
-      margin-bottom: 20px;
     }
 
     label {
@@ -90,6 +88,42 @@
       font-weight: bold;
     }
 
+    #loading {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.6);
+      z-index: 999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
+    }
+
+    #confirmModal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      display: none;
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #confirmBox {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    #confirmBox button {
+      margin: 10px;
+      width: auto;
+    }
+
     @media (max-width: 600px) {
       .form-container {
         margin: 20px;
@@ -99,19 +133,28 @@
   </style>
 </head>
 <body>
-
   <video autoplay muted loop id="bg-video">
     <source src="https://laserpowerinfra.com/frontassets/img/slider/Banner_v04_HD_L.mp4" type="video/mp4">
   </video>
+
+  <div id="loading">Loading...</div>
+
+  <div id="confirmModal">
+    <div id="confirmBox">
+      <p>Are you sure you want to submit the leave request?</p>
+      <button id="confirmYes">Yes</button>
+      <button id="confirmNo">No</button>
+    </div>
+  </div>
 
   <div class="form-container">
     <h2>Leave Application Form</h2>
 
     <div class="balance-info">
-      CL Balance: <span id="cl_balance">-</span> |
-      SL Balance: <span id="sl_balance">-</span> |
-      COFF Balance: <span id="coff_balance">-</span> |
-      Total Balance: <span id="total_balance">-</span>
+      CL: <span id="cl_balance">-</span> |
+      SL: <span id="sl_balance">-</span> |
+      COFF: <span id="coff_balance">-</span> |
+      Total: <span id="total_balance">-</span>
     </div>
 
     <form id="leaveForm">
@@ -165,7 +208,7 @@
       </label>
 
       <label>USER MAIL:
-        <input type="email" name="user_mail" id="user_mail" required />
+        <input type="email" name="user_mail" id="user_mail" required readonly />
       </label>
 
       <p id="error"></p>
@@ -174,40 +217,43 @@
     </form>
   </div>
 
+  <!-- Google Sign-In -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script>
+    window.onload = function () {
+      google.accounts.id.initialize({
+        client_id: "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",
+        callback: (response) => {
+          const payload = JSON.parse(atob(response.credential.split('.')[1]));
+          document.getElementById("user_mail").value = payload.email;
+        }
+      });
+      google.accounts.id.prompt();
+    };
+  </script>
+
   <script>
     const scriptURL = 'https://script.google.com/macros/s/AKfycbw98lNUp42hvEA-yOTI96At0wDlqhw9yX8oALIjrh13H6RWnmIEgS9LE87ScJ2AT8GvjA/exec';
-
-    const empCodeInput = document.getElementById("emp_code");
-    const submitBtn = document.querySelector("button[type='submit']");
-    const error = document.getElementById("error");
     const form = document.getElementById("leaveForm");
+    const loading = document.getElementById("loading");
+    const confirmModal = document.getElementById("confirmModal");
 
-    empCodeInput.addEventListener("change", function () {
+    document.getElementById("emp_code").addEventListener("change", function () {
       const empCode = this.value.trim();
       if (!empCode) return;
 
-      empCodeInput.disabled = true;
-      error.innerText = "Fetching data...";
-
-      const timeout = setTimeout(() => {
-        error.innerText = "Request timeout. Please check your internet.";
-        empCodeInput.disabled = false;
-      }, 10000);
-
+      loading.style.display = "flex";
       fetch(`${scriptURL}?emp_code=${empCode}`)
         .then(res => res.json())
         .then(data => {
-          clearTimeout(timeout);
-          empCodeInput.disabled = false;
           if (data.found) {
             const emp = data.employees[0];
-            document.getElementById("emp_name").value = emp.emp_name;
-            document.getElementById("hod").value = emp.hod;
-            document.getElementById("design_name").value = emp.design_name;
-            document.getElementById("dept_name").value = emp.dept_name;
-            document.getElementById("hod_mail").value = emp.hod_mail;
+            form.emp_name.value = emp.emp_name;
+            form.hod.value = emp.hod;
+            form.design_name.value = emp.design_name;
+            form.dept_name.value = emp.dept_name;
+            form.hod_mail.value = emp.hod_mail;
 
-            // Set leave balances
             document.getElementById("cl_balance").innerText = emp.cl || 0;
             document.getElementById("sl_balance").innerText = emp.sl || 0;
             document.getElementById("coff_balance").innerText = emp.coff || 0;
@@ -216,60 +262,53 @@
             form.dataset.cl = emp.cl || 0;
             form.dataset.sl = emp.sl || 0;
             form.dataset.coff = emp.coff || 0;
-
-            error.innerText = "";
           } else {
-            error.innerText = "Employee not found.";
+            alert("Employee not found");
           }
         })
-        .catch(err => {
-          clearTimeout(timeout);
-          error.innerText = "Error: " + err.message;
-          empCodeInput.disabled = false;
-        });
+        .catch(err => alert("Error fetching employee data"))
+        .finally(() => loading.style.display = "none");
     });
 
     function calculateLeave() {
-      const from = new Date(document.getElementById("from_date").value);
-      const to = new Date(document.getElementById("to_date").value);
-      const leaveType = document.getElementById("leave_type").value;
+      const from = new Date(form.from_date.value);
+      const to = new Date(form.to_date.value);
+      const leaveType = form.leave_type.value;
 
       if (isNaN(from.getTime()) || isNaN(to.getTime())) return;
-
       if (to < from) {
-        error.innerText = "TO DATE cannot be before FROM DATE";
-        document.getElementById("taken_leave_count").value = "";
+        document.getElementById("error").innerText = "TO DATE cannot be before FROM DATE";
+        form.taken_leave_count.value = "";
         return;
       }
 
       const days = (to - from) / (1000 * 60 * 60 * 24) + 1;
-      document.getElementById("taken_leave_count").value = days;
+      form.taken_leave_count.value = days;
 
-      let balance = 0;
-      if (leaveType === "CL") balance = parseFloat(form.dataset.cl || 0);
-      else if (leaveType === "SL") balance = parseFloat(form.dataset.sl || 0);
-      else if (leaveType === "COFF") balance = parseFloat(form.dataset.coff || 0);
-
-      if (leaveType && days > balance) {
-        error.innerText = `Insufficient ${leaveType} balance. Available: ${balance}`;
+      const balance = parseFloat(form.dataset[leaveType?.toLowerCase()] || 0);
+      if (days > balance) {
+        document.getElementById("error").innerText = `Insufficient ${leaveType} balance. Available: ${balance}`;
       } else {
-        error.innerText = "";
+        document.getElementById("error").innerText = "";
       }
     }
 
-    document.getElementById("from_date").addEventListener("change", calculateLeave);
-    document.getElementById("to_date").addEventListener("change", calculateLeave);
-    document.getElementById("leave_type").addEventListener("change", calculateLeave);
+    form.from_date.addEventListener("change", calculateLeave);
+    form.to_date.addEventListener("change", calculateLeave);
+    form.leave_type.addEventListener("change", calculateLeave);
 
     form.addEventListener("submit", function (e) {
       e.preventDefault();
-      if (error.innerText) {
+      if (document.getElementById("error").innerText) {
         alert("Fix errors before submitting.");
         return;
       }
+      confirmModal.style.display = "flex";
+    });
 
-      submitBtn.disabled = true;
-      submitBtn.innerText = "Submitting...";
+    document.getElementById("confirmYes").onclick = () => {
+      confirmModal.style.display = "none";
+      loading.style.display = "flex";
 
       const formData = new FormData(form);
 
@@ -280,22 +319,21 @@
         .then(res => res.text())
         .then(msg => {
           alert(msg);
+          const mailto = `mailto:${form.hod_mail.value}?subject=Leave Approval Request&body=Please approve or reject the leave request for ${form.emp_name.value} (${form.emp_code.value}) from ${form.from_date.value} to ${form.to_date.value} (%0A)%0A[Approve]%0A[Reject]`;
+          window.open(mailto);
           form.reset();
           document.getElementById("cl_balance").innerText = "-";
           document.getElementById("sl_balance").innerText = "-";
           document.getElementById("coff_balance").innerText = "-";
           document.getElementById("total_balance").innerText = "-";
-          error.innerText = "";
         })
-        .catch(err => {
-          alert("Submission failed: " + err.message);
-        })
-        .finally(() => {
-          submitBtn.disabled = false;
-          submitBtn.innerText = "Submit";
-        });
-    });
-  </script>
+        .catch(err => alert("Submission failed: " + err.message))
+        .finally(() => loading.style.display = "none");
+    };
 
+    document.getElementById("confirmNo").onclick = () => {
+      confirmModal.style.display = "none";
+    };
+  </script>
 </body>
 </html>
