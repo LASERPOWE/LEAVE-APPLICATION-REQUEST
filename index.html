@@ -5,20 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Leave Application Form</title>
 
-  <!-- Google Sign-In -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <style>
-    * {
-      box-sizing: border-box;
-      font-family: 'Segoe UI', sans-serif;
-    }
-
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-    }
+    * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+    html, body { margin: 0; padding: 0; height: 100%; }
 
     video#bg-video {
       position: fixed;
@@ -53,9 +44,7 @@
       box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
     }
 
-    h2 {
-      text-align: center;
-    }
+    h2 { text-align: center; }
 
     label {
       display: block;
@@ -87,15 +76,9 @@
       margin-top: 15px;
     }
 
-    button:hover {
-      background-color: #1565c0;
-    }
+    button:hover { background-color: #1565c0; }
 
-    #error {
-      color: red;
-      text-align: center;
-      margin-top: 10px;
-    }
+    #error { color: red; text-align: center; margin-top: 10px; }
 
     .balance-info {
       margin: 10px 0;
@@ -242,7 +225,7 @@
       </label>
 
       <label>USER MAIL:
-        <input type="email" name="user_mail" id="user_mail" required readonly />
+        <input type="email" name="user_mail" id="user_mail" readonly required />
       </label>
 
       <p id="error"></p>
@@ -256,12 +239,20 @@
     const loading = document.getElementById("loading");
     const confirmModal = document.getElementById("confirmModal");
 
-    // Handle Google Sign-In
+    window.onload = () => {
+      const storedEmail = localStorage.getItem("user_mail");
+      if (storedEmail) {
+        document.getElementById("user_mail").value = storedEmail;
+        document.querySelector(".form-container").style.display = "block";
+        document.getElementById("authOverlay").style.display = "none";
+      }
+    };
+
     function handleCredentialResponse(response) {
       const decoded = parseJwt(response.credential);
       const email = decoded.email;
       if (email) {
-        console.log("Logged in user:", email);
+        localStorage.setItem("user_mail", email);
         document.getElementById("user_mail").value = email;
         document.querySelector(".form-container").style.display = "block";
         document.getElementById("authOverlay").style.display = "none";
@@ -356,7 +347,7 @@
         .then(res => res.text())
         .then(msg => {
           alert(msg);
-          const mailto = `mailto:${form.hod_mail.value}?subject=Leave Approval Request&body=Please approve or reject the leave request for ${form.emp_name.value} (${form.emp_code.value}) from ${form.from_date.value} to ${form.to_date.value} (%0A)%0A[Approve]%0A[Reject]`;
+          const mailto = `mailto:${form.hod_mail.value}?subject=Leave Approval Request&body=Please approve or reject the leave request for ${form.emp_name.value} (${form.emp_code.value}) from ${form.from_date.value} to ${form.to_date.value}%0A%0A[Approve]%0A[Reject]`;
           window.open(mailto);
           form.reset();
           document.getElementById("cl_balance").innerText = "-";
