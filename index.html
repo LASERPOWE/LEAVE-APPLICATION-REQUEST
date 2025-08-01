@@ -208,7 +208,7 @@
       </label>
 
       <label>USER MAIL:
-        <input type="email" name="user_mail" id="user_mail" required readonly />
+        <input type="email" name="user_mail" id="user_mail" required />
       </label>
 
       <p id="error"></p>
@@ -216,21 +216,6 @@
       <button type="submit">Submit</button>
     </form>
   </div>
-
-  <!-- Google Sign-In -->
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <script>
-    window.onload = function () {
-      google.accounts.id.initialize({
-        client_id: "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",
-        callback: (response) => {
-          const payload = JSON.parse(atob(response.credential.split('.')[1]));
-          document.getElementById("user_mail").value = payload.email;
-        }
-      });
-      google.accounts.id.prompt();
-    };
-  </script>
 
   <script>
     const scriptURL = 'https://script.google.com/macros/s/AKfycbw98lNUp42hvEA-yOTI96At0wDlqhw9yX8oALIjrh13H6RWnmIEgS9LE87ScJ2AT8GvjA/exec';
