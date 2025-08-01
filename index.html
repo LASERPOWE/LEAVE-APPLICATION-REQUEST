@@ -2,274 +2,375 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Leave Application</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Leave Application Form</title>
+
+  <!-- Google Sign-In -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+
   <style>
-    body {
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    html, body {
       margin: 0;
-      font-family: "Segoe UI", sans-serif;
-      background: linear-gradient(to right, #dfe9f3 0%, white 100%);
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      padding: 0;
+      height: 100%;
+    }
+
+    video#bg-video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      min-width: 100vw;
       min-height: 100vh;
+      z-index: -1;
+      object-fit: cover;
+      opacity: 0.5;
     }
-    .container {
-      background: white;
-      padding: 30px;
-      border-radius: 16px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-      width: 100%;
+
+    #authOverlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0, 0, 0, 0.85);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      flex-direction: column;
+    }
+
+    .form-container {
       max-width: 600px;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 30px;
+      margin: 50px auto;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
     }
+
     h2 {
       text-align: center;
-      margin-bottom: 20px;
     }
+
     label {
       display: block;
-      margin-top: 12px;
+      margin-bottom: 12px;
       font-weight: 500;
     }
-    input, select, textarea {
+
+    input, select {
       width: 100%;
       padding: 10px;
+      margin-top: 5px;
       border: 1px solid #ccc;
       border-radius: 8px;
-      margin-top: 5px;
-      box-sizing: border-box;
     }
+
+    input[readonly] {
+      background-color: #f9f9f9;
+    }
+
     button {
-      background-color: #28a745;
+      width: 100%;
+      padding: 12px;
+      background-color: #1e88e5;
       color: white;
       border: none;
-      padding: 12px 20px;
-      font-size: 16px;
       border-radius: 8px;
+      font-size: 16px;
       cursor: pointer;
-      margin-top: 20px;
-      width: 100%;
+      margin-top: 15px;
     }
+
     button:hover {
-      background-color: #218838;
+      background-color: #1565c0;
     }
-    .spinner {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(255,255,255,0.8);
-      z-index: 1000;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 20px;
-      display: none;
-    }
-    #confirmationModal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 2000;
-      justify-content: center;
-      align-items: center;
-    }
-    .modal-content {
-      background: white;
-      padding: 30px;
-      border-radius: 12px;
+
+    #error {
+      color: red;
       text-align: center;
-      max-width: 300px;
+      margin-top: 10px;
     }
-    .modal-content button {
-      width: 45%;
-      margin: 5px;
+
+    .balance-info {
+      margin: 10px 0;
+      padding: 10px;
+      background-color: #f1f1f1;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+
+    #loading {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.6);
+      z-index: 999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
+    }
+
+    #confirmModal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      display: none;
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #confirmBox {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    #confirmBox button {
+      margin: 10px;
+      width: auto;
+    }
+
+    @media (max-width: 600px) {
+      .form-container {
+        margin: 20px;
+        padding: 20px;
+      }
     }
   </style>
 </head>
 <body>
-  <!-- Spinner -->
-  <div id="spinner" class="spinner">🔄 Logging you in...</div>
+  <video autoplay muted loop id="bg-video">
+    <source src="https://laserpowerinfra.com/frontassets/img/slider/Banner_v04_HD_L.mp4" type="video/mp4">
+  </video>
 
-  <!-- Confirmation Modal -->
-  <div id="confirmationModal">
-    <div class="modal-content">
-      <p>Are you sure you want to submit the leave application?</p>
-      <button onclick="submitForm()">Yes</button>
-      <button onclick="hideModal()">Cancel</button>
+  <div id="loading">Loading...</div>
+
+  <div id="authOverlay">
+    <div id="g_id_onload"
+         data-client_id="995677134206-i3n2k43cvsr48ngjb6t69s7tsr0sivpj.apps.googleusercontent.com"
+         data-callback="handleCredentialResponse"
+         data-auto_prompt="true">
+    </div>
+    <div class="g_id_signin"
+         data-type="standard"
+         data-size="large"
+         data-theme="outline"
+         data-text="sign_in_with"
+         data-shape="rectangular"
+         data-logo_alignment="left">
+    </div>
+    <p>Please sign in to continue.</p>
+  </div>
+
+  <div id="confirmModal">
+    <div id="confirmBox">
+      <p>Are you sure you want to submit the leave request?</p>
+      <button id="confirmYes">Yes</button>
+      <button id="confirmNo">No</button>
     </div>
   </div>
 
-  <!-- Main Form Container -->
-  <div class="container">
-    <h2>Leave Application</h2>
+  <div class="form-container" style="display:none;">
+    <h2>Leave Application Form</h2>
 
-    <!-- Google Sign-In -->
-    <div id="g_id_signin"></div>
-    <p id="welcome-msg" style="text-align:center; margin-top:10px;"></p>
+    <div class="balance-info">
+      CL: <span id="cl_balance">-</span> |
+      SL: <span id="sl_balance">-</span> |
+      COFF: <span id="coff_balance">-</span> |
+      Total: <span id="total_balance">-</span>
+    </div>
 
     <form id="leaveForm">
-      <label>EMP CODE</label>
-      <input type="text" id="emp_code" required onblur="fetchEmployeeData()">
+      <label>EMP_CODE:
+        <input type="text" name="emp_code" id="emp_code" required />
+      </label>
 
-      <label>EMP NAME</label>
-      <input type="text" id="emp_name" readonly>
+      <label>EMP_NAME:
+        <input type="text" name="emp_name" id="emp_name" readonly />
+      </label>
 
-      <label>HOD</label>
-      <input type="text" id="hod" readonly>
+      <label>HOD:
+        <input type="text" name="hod" id="hod" readonly />
+      </label>
 
-      <label>DESIG NAME</label>
-      <input type="text" id="desig_name" readonly>
+      <label>DESIG_NAME:
+        <input type="text" name="design_name" id="design_name" readonly />
+      </label>
 
-      <label>DEPT NAME</label>
-      <input type="text" id="dept_name" readonly>
+      <label>DEPT_NAME:
+        <input type="text" name="dept_name" id="dept_name" readonly />
+      </label>
 
-      <label>LEAVE TYPE</label>
-      <select id="leave_type" required>
-        <option value="">Select</option>
-        <option value="CL">CL</option>
-        <option value="SL">SL</option>
-        <option value="COFF">COFF</option>
-      </select>
+      <label>LEAVE TYPE:
+        <select name="leave_type" id="leave_type" required>
+          <option value="">--Select--</option>
+          <option value="CL">CL</option>
+          <option value="SL">SL</option>
+          <option value="COFF">COFF</option>
+        </select>
+      </label>
 
-      <label>FROM DATE</label>
-      <input type="date" id="from_date" required onchange="calculateLeaveCount()">
+      <label>FROM DATE:
+        <input type="date" name="from_date" id="from_date" required />
+      </label>
 
-      <label>TO DATE</label>
-      <input type="date" id="to_date" required onchange="calculateLeaveCount()">
+      <label>TO DATE:
+        <input type="date" name="to_date" id="to_date" required />
+      </label>
 
-      <label>REASON</label>
-      <textarea id="reason" rows="2" required></textarea>
+      <label>REASON:
+        <input type="text" name="reason" id="reason" required />
+      </label>
 
-      <label>TAKEN LEAVE COUNT</label>
-      <input type="number" id="leave_count" readonly>
+      <label>TAKEN LEAVE COUNT:
+        <input type="number" name="taken_leave_count" id="taken_leave_count" readonly />
+      </label>
 
-      <label>HOD MAIL</label>
-      <input type="email" id="hod_mail" readonly>
+      <label>HOD MAIL ID:
+        <input type="email" name="hod_mail" id="hod_mail" readonly />
+      </label>
 
-      <label>USER MAIL</label>
-      <input type="email" id="user_mail" readonly required>
+      <label>USER MAIL:
+        <input type="email" name="user_mail" id="user_mail" required readonly />
+      </label>
 
-      <button type="button" onclick="showModal()">Submit</button>
+      <p id="error"></p>
+      <button type="submit">Submit</button>
     </form>
   </div>
 
   <script>
-    const spinner = document.getElementById("spinner");
-    const welcomeMsg = document.getElementById("welcome-msg");
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbw98lNUp42hvEA-yOTI96At0wDlqhw9yX8oALIjrh13H6RWnmIEgS9LE87ScJ2AT8GvjA/exec';
+    const form = document.getElementById("leaveForm");
+    const loading = document.getElementById("loading");
+    const confirmModal = document.getElementById("confirmModal");
 
-    spinner.style.display = "flex"; // Show loader initially
-
+    // Handle Google Sign-In
     function handleCredentialResponse(response) {
-      spinner.style.display = "none";
-      const data = parseJwt(response.credential);
-      document.getElementById("user_mail").value = data.email;
-      welcomeMsg.innerHTML = `Welcome, <strong>${data.name}</strong>`;
+      const decoded = parseJwt(response.credential);
+      const email = decoded.email;
+      if (email) {
+        console.log("Logged in user:", email);
+        document.getElementById("user_mail").value = email;
+        document.querySelector(".form-container").style.display = "block";
+        document.getElementById("authOverlay").style.display = "none";
+      }
     }
 
     function parseJwt(token) {
       const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(atob(base64).split('').map(c =>
-        '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
-      ).join(''));
-      return JSON.parse(jsonPayload);
+      const base64 = decodeURIComponent(atob(base64Url).split('').map(c =>
+        '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+      return JSON.parse(base64);
     }
 
-    window.onload = () => {
-      google.accounts.id.initialize({
-        client_id: "995677134206-i3n2k43cvsr48ngjb6t69s7tsr0sivpj.apps.googleusercontent.com",
-        callback: handleCredentialResponse,
-        auto_select: true
-      });
-      google.accounts.id.renderButton(
-        document.getElementById("g_id_signin"),
-        { theme: "outline", size: "large" }
-      );
-      google.accounts.id.prompt();
-    };
-
-    function fetchEmployeeData() {
-      const empCode = document.getElementById("emp_code").value.trim();
+    document.getElementById("emp_code").addEventListener("change", function () {
+      const empCode = this.value.trim();
       if (!empCode) return;
 
-      spinner.style.display = "flex";
-      const url = `https://script.google.com/macros/s/AKfycbwo_9o4UxgcQfFxQtEHPb9351an-SoYQQ3d2CfeWh4v0Qr-BHHXzjtp9ccEGULNC_AfNw/exec?emp_code=${empCode}`;
-      fetch(url)
+      loading.style.display = "flex";
+      fetch(`${scriptURL}?emp_code=${empCode}`)
         .then(res => res.json())
         .then(data => {
-          spinner.style.display = "none";
-          document.getElementById("emp_name").value = data.emp_name || "";
-          document.getElementById("hod").value = data.hod || "";
-          document.getElementById("desig_name").value = data.desig_name || "";
-          document.getElementById("dept_name").value = data.dept_name || "";
-          document.getElementById("hod_mail").value = data.hod_mail || "";
-        })
-        .catch(err => {
-          spinner.style.display = "none";
-          alert("Error fetching employee data.");
-        });
-    }
+          if (data.found) {
+            const emp = data.employees[0];
+            form.emp_name.value = emp.emp_name;
+            form.hod.value = emp.hod;
+            form.design_name.value = emp.design_name;
+            form.dept_name.value = emp.dept_name;
+            form.hod_mail.value = emp.hod_mail;
 
-    function calculateLeaveCount() {
-      const from = new Date(document.getElementById("from_date").value);
-      const to = new Date(document.getElementById("to_date").value);
-      if (to >= from) {
-        const diff = (to - from) / (1000 * 60 * 60 * 24) + 1;
-        document.getElementById("leave_count").value = diff;
+            document.getElementById("cl_balance").innerText = emp.cl || 0;
+            document.getElementById("sl_balance").innerText = emp.sl || 0;
+            document.getElementById("coff_balance").innerText = emp.coff || 0;
+            document.getElementById("total_balance").innerText = emp.total_leave || 0;
+
+            form.dataset.cl = emp.cl || 0;
+            form.dataset.sl = emp.sl || 0;
+            form.dataset.coff = emp.coff || 0;
+          } else {
+            alert("Employee not found");
+          }
+        })
+        .catch(err => alert("Error fetching employee data"))
+        .finally(() => loading.style.display = "none");
+    });
+
+    function calculateLeave() {
+      const from = new Date(form.from_date.value);
+      const to = new Date(form.to_date.value);
+      const leaveType = form.leave_type.value;
+
+      if (isNaN(from.getTime()) || isNaN(to.getTime())) return;
+      if (to < from) {
+        document.getElementById("error").innerText = "TO DATE cannot be before FROM DATE";
+        form.taken_leave_count.value = "";
+        return;
+      }
+
+      const days = (to - from) / (1000 * 60 * 60 * 24) + 1;
+      form.taken_leave_count.value = days;
+
+      const balance = parseFloat(form.dataset[leaveType?.toLowerCase()] || 0);
+      if (days > balance) {
+        document.getElementById("error").innerText = `Insufficient ${leaveType} balance. Available: ${balance}`;
       } else {
-        document.getElementById("leave_count").value = 0;
+        document.getElementById("error").innerText = "";
       }
     }
 
-    function showModal() {
-      document.getElementById("confirmationModal").style.display = "flex";
-    }
+    form.from_date.addEventListener("change", calculateLeave);
+    form.to_date.addEventListener("change", calculateLeave);
+    form.leave_type.addEventListener("change", calculateLeave);
 
-    function hideModal() {
-      document.getElementById("confirmationModal").style.display = "none";
-    }
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      if (document.getElementById("error").innerText) {
+        alert("Fix errors before submitting.");
+        return;
+      }
+      confirmModal.style.display = "flex";
+    });
 
-    function submitForm() {
-      hideModal();
-      const form = document.getElementById("leaveForm");
-      const data = {
-        emp_code: form.emp_code.value,
-        emp_name: form.emp_name.value,
-        hod: form.hod.value,
-        desig_name: form.desig_name.value,
-        dept_name: form.dept_name.value,
-        leave_type: form.leave_type.value,
-        from_date: form.from_date.value,
-        to_date: form.to_date.value,
-        reason: form.reason.value,
-        leave_count: Number(form.leave_count.value),
-        hod_mail: form.hod_mail.value,
-        user_mail: form.user_mail.value,
-      };
+    document.getElementById("confirmYes").onclick = () => {
+      confirmModal.style.display = "none";
+      loading.style.display = "flex";
 
-      spinner.style.display = "flex";
-      fetch("https://script.google.com/macros/s/AKfycbwo_9o4UxgcQfFxQtEHPb9351an-SoYQQ3d2CfeWh4v0Qr-BHHXzjtp9ccEGULNC_AfNw/exec", {
+      const formData = new FormData(form);
+
+      fetch(scriptURL, {
         method: "POST",
-        mode: "no-cors",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
-      }).then(() => {
-        spinner.style.display = "none";
-        alert("Leave application submitted!");
-        form.reset();
-        document.getElementById("user_mail").value = data.user_mail;
-      }).catch(() => {
-        spinner.style.display = "none";
-        alert("Submission failed!");
-      });
-    }
+        body: formData
+      })
+        .then(res => res.text())
+        .then(msg => {
+          alert(msg);
+          const mailto = `mailto:${form.hod_mail.value}?subject=Leave Approval Request&body=Please approve or reject the leave request for ${form.emp_name.value} (${form.emp_code.value}) from ${form.from_date.value} to ${form.to_date.value} (%0A)%0A[Approve]%0A[Reject]`;
+          window.open(mailto);
+          form.reset();
+          document.getElementById("cl_balance").innerText = "-";
+          document.getElementById("sl_balance").innerText = "-";
+          document.getElementById("coff_balance").innerText = "-";
+          document.getElementById("total_balance").innerText = "-";
+        })
+        .catch(err => alert("Submission failed: " + err.message))
+        .finally(() => loading.style.display = "none");
+    };
+
+    document.getElementById("confirmNo").onclick = () => {
+      confirmModal.style.display = "none";
+    };
   </script>
 </body>
 </html>
