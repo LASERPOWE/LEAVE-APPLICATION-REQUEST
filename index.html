@@ -2,67 +2,165 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Leave Application Form</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Leave Application Form</title>
 
   <!-- Google Sign-In -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
-  <script>
-    let userEmail = "";
-
-    function parseJwt(token) {
-      const base64Url = token.split('.')[1];
-      const base64 = decodeURIComponent(atob(base64Url).split('').map(c =>
-        '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
-      ).join(''));
-      return JSON.parse(base64);
-    }
-
-    function handleCredentialResponse(response) {
-      const decoded = parseJwt(response.credential);
-      userEmail = decoded.email;
-      document.getElementById("user_mail").value = userEmail;
-      document.getElementById("formContainer").style.display = "block";
-    }
-
-    window.onload = function () {
-      google.accounts.id.initialize({
-        client_id: "995677134206-i3n2k43cvsr48ngjb6t69s7tsr0sivpj.apps.googleusercontent.com",
-        callback: handleCredentialResponse,
-        auto_select: false,
-        ux_mode: "popup",
-      });
-
-      // Show sign-in prompt
-      google.accounts.id.prompt((notification) => {
-        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-          alert("You must sign in with your Google account to use this form.");
-          window.location.reload();
-        }
-      });
-    };
-  </script>
-
   <style>
-    /* Your existing CSS here... (keep same as previous version) */
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
 
-    #formContainer {
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+
+    video#bg-video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      min-width: 100vw;
+      min-height: 100vh;
+      z-index: -1;
+      object-fit: cover;
+      opacity: 0.5;
+    }
+
+    #authOverlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0, 0, 0, 0.85);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      flex-direction: column;
+    }
+
+    .form-container {
+      max-width: 600px;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 30px;
+      margin: 50px auto;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+    }
+
+    h2 {
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 12px;
+      font-weight: 500;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    input[readonly] {
+      background-color: #f9f9f9;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #1e88e5;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+
+    button:hover {
+      background-color: #1565c0;
+    }
+
+    #error {
+      color: red;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .balance-info {
+      margin: 10px 0;
+      padding: 10px;
+      background-color: #f1f1f1;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+
+    #loading {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.6);
+      z-index: 999;
       display: none;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
+    }
+
+    #confirmModal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      display: none;
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #confirmBox {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    #confirmBox button {
+      margin: 10px;
+      width: auto;
+    }
+
+    @media (max-width: 600px) {
+      .form-container {
+        margin: 20px;
+        padding: 20px;
+      }
     }
   </style>
 </head>
 <body>
-
-  <!-- Background Video -->
   <video autoplay muted loop id="bg-video">
     <source src="https://laserpowerinfra.com/frontassets/img/slider/Banner_v04_HD_L.mp4" type="video/mp4">
   </video>
 
-  <!-- Loading spinner -->
   <div id="loading">Loading...</div>
 
-  <!-- Confirm Modal -->
+  <div id="authOverlay">
+    <div id="g_id_signin"></div>
+    <p>Please sign in to continue.</p>
+  </div>
+
   <div id="confirmModal">
     <div id="confirmBox">
       <p>Are you sure you want to submit the leave request?</p>
@@ -71,8 +169,7 @@
     </div>
   </div>
 
-  <!-- Main Form Container (initially hidden until login) -->
-  <div class="form-container" id="formContainer">
+  <div class="form-container" style="display:none;">
     <h2>Leave Application Form</h2>
 
     <div class="balance-info">
@@ -133,7 +230,7 @@
       </label>
 
       <label>USER MAIL:
-        <input type="email" name="user_mail" id="user_mail" readonly />
+        <input type="email" name="user_mail" id="user_mail" required readonly />
       </label>
 
       <p id="error"></p>
@@ -146,6 +243,36 @@
     const form = document.getElementById("leaveForm");
     const loading = document.getElementById("loading");
     const confirmModal = document.getElementById("confirmModal");
+
+    // Google Sign-In
+    window.onload = () => {
+      google.accounts.id.initialize({
+        client_id: "995677134206-i3n2k43cvsr48ngjb6t69s7tsr0sivpj.apps.googleusercontent.com",
+        callback: handleCredentialResponse
+      });
+      google.accounts.id.renderButton(
+        document.getElementById("g_id_signin"),
+        { theme: "outline", size: "large" }
+      );
+      google.accounts.id.prompt();
+    };
+
+    function handleCredentialResponse(response) {
+      const decoded = parseJwt(response.credential);
+      const email = decoded.email;
+      if (email) {
+        document.getElementById("user_mail").value = email;
+        document.querySelector(".form-container").style.display = "block";
+        document.getElementById("authOverlay").style.display = "none";
+      }
+    }
+
+    function parseJwt(token) {
+      const base64Url = token.split('.')[1];
+      const base64 = decodeURIComponent(atob(base64Url).split('').map(c =>
+        '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+      return JSON.parse(base64);
+    }
 
     document.getElementById("emp_code").addEventListener("change", function () {
       const empCode = this.value.trim();
