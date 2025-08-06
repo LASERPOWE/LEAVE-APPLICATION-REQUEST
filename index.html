@@ -129,10 +129,12 @@
 
     <form id="leaveForm">
       <label>EMP_CODE: <input type="text" name="emp_code" id="emp_code" required /></label>
+
       <label>EMP_NAME:
-        <select id="emp_name_select" style="display:none; margin-bottom: 10px;"></select>
-        <input type="text" name="emp_name" id="emp_name" readonly />
+        <select id="emp_name_select" name="emp_name" style="display:none;"></select>
+        <input type="text" id="emp_name" name="emp_name" readonly />
       </label>
+
       <label>HOD: <input type="text" name="hod" id="hod" readonly /></label>
       <label>DESIG_NAME: <input type="text" name="design_name" id="design_name" readonly /></label>
       <label>DEPT_NAME: <input type="text" name="dept_name" id="dept_name" readonly /></label>
@@ -201,11 +203,14 @@
             const employees = data.employees;
 
             if (employees.length === 1) {
+              document.getElementById("emp_name").style.display = "block";
+              document.getElementById("emp_name_select").style.display = "none";
               populateEmployeeForm(employees[0]);
             } else {
               const empSelect = document.getElementById("emp_name_select");
               empSelect.innerHTML = "";
               empSelect.style.display = "block";
+              document.getElementById("emp_name").style.display = "none";
 
               employees.forEach((emp, index) => {
                 const opt = document.createElement("option");
@@ -217,13 +222,15 @@
               empSelect.onchange = () => {
                 const selectedEmp = employees[empSelect.value];
                 populateEmployeeForm(selectedEmp);
-                empSelect.style.display = "none";
+                document.getElementById("emp_name").style.display = "block";
+                document.getElementById("emp_name_select").style.display = "none";
               };
 
-              alert("Multiple employees found. Please select the correct name.");
+              alert("Multiple employees found. Please select EMP_NAME.");
             }
           } else {
             alert("Employee not found");
+            resetFormData();
           }
         })
         .catch(() => alert("Error fetching employee data"))
@@ -243,6 +250,18 @@
       form.dataset.cl = emp.cl || 0;
       form.dataset.sl = emp.sl || 0;
       form.dataset.coff = emp.coff || 0;
+    }
+
+    function resetFormData() {
+      form.emp_name.value = "";
+      form.hod.value = "";
+      form.design_name.value = "";
+      form.dept_name.value = "";
+      form.hod_mail.value = "";
+      document.getElementById("cl_balance").innerText = "-";
+      document.getElementById("sl_balance").innerText = "-";
+      document.getElementById("coff_balance").innerText = "-";
+      document.getElementById("total_balance").innerText = "-";
     }
 
     function calculateLeave() {
@@ -300,10 +319,7 @@
           const mailto = `mailto:${form.hod_mail.value}?subject=Leave Approval Request&body=Please approve or reject the leave request for ${form.emp_name.value} (${form.emp_code.value}) from ${form.from_date.value} to ${form.to_date.value}%0A%0A[Approve]%0A[Reject]`;
           window.open(mailto);
           form.reset();
-          document.getElementById("cl_balance").innerText = "-";
-          document.getElementById("sl_balance").innerText = "-";
-          document.getElementById("coff_balance").innerText = "-";
-          document.getElementById("total_balance").innerText = "-";
+          resetFormData();
         })
         .catch(err => alert("Submission failed: " + err.message))
         .finally(() => loading.style.display = "none");
