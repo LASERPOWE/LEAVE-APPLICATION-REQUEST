@@ -4,9 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Leave Application Form</title>
-
   <script src="https://accounts.google.com/gsi/client" async defer></script>
-
   <style>
     * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
     html, body { margin: 0; padding: 0; height: 100%; }
@@ -45,90 +43,49 @@
     }
 
     h2 { text-align: center; }
-
-    label {
-      display: block;
-      margin-bottom: 12px;
-      font-weight: 500;
-    }
-
+    label { display: block; margin-bottom: 12px; font-weight: 500; }
     input, select {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
+      width: 100%; padding: 10px; margin-top: 5px;
+      border: 1px solid #ccc; border-radius: 8px;
     }
 
-    input[readonly] {
-      background-color: #f9f9f9;
-    }
-
+    input[readonly] { background-color: #f9f9f9; }
     button {
-      width: 100%;
-      padding: 12px;
-      background-color: #1e88e5;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-      margin-top: 15px;
+      width: 100%; padding: 12px; background-color: #1e88e5;
+      color: white; border: none; border-radius: 8px;
+      font-size: 16px; cursor: pointer; margin-top: 15px;
     }
-
     button:hover { background-color: #1565c0; }
-
     #error { color: red; text-align: center; margin-top: 10px; }
 
     .balance-info {
-      margin: 10px 0;
-      padding: 10px;
-      background-color: #f1f1f1;
-      border-radius: 8px;
+      margin: 10px 0; padding: 10px;
+      background-color: #f1f1f1; border-radius: 8px;
       font-weight: bold;
     }
 
     #loading {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background-color: rgba(0,0,0,0.6);
-      z-index: 999;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 24px;
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.6); z-index: 999;
+      display: none; align-items: center; justify-content: center;
+      color: white; font-size: 24px;
     }
 
     #confirmModal {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.6);
-      display: none;
-      z-index: 1000;
-      justify-content: center;
-      align-items: center;
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.6); display: none;
+      z-index: 1000; justify-content: center; align-items: center;
     }
 
     #confirmBox {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
+      background: white; padding: 20px; border-radius: 10px;
       text-align: center;
     }
 
-    #confirmBox button {
-      margin: 10px;
-      width: auto;
-    }
+    #confirmBox button { margin: 10px; width: auto; }
 
     @media (max-width: 600px) {
-      .form-container {
-        margin: 20px;
-        padding: 20px;
-      }
+      .form-container { margin: 20px; padding: 20px; }
     }
   </style>
 </head>
@@ -145,13 +102,9 @@
          data-callback="handleCredentialResponse"
          data-auto_prompt="true">
     </div>
-    <div class="g_id_signin"
-         data-type="standard"
-         data-size="large"
-         data-theme="outline"
-         data-text="sign_in_with"
-         data-shape="rectangular"
-         data-logo_alignment="left">
+    <div class="g_id_signin" data-type="standard" data-size="large"
+         data-theme="outline" data-text="sign_in_with"
+         data-shape="rectangular" data-logo_alignment="left">
     </div>
     <p>Please sign in to continue.</p>
   </div>
@@ -175,60 +128,26 @@
     </div>
 
     <form id="leaveForm">
-      <label>EMP_CODE:
-        <input type="text" name="emp_code" id="emp_code" required />
-      </label>
-
-      <label>EMP_NAME:
-        <input type="text" name="emp_name" id="emp_name" readonly />
-      </label>
-
-      <label>HOD:
-        <input type="text" name="hod" id="hod" readonly />
-      </label>
-
-      <label>DESIG_NAME:
-        <input type="text" name="design_name" id="design_name" readonly />
-      </label>
-
-      <label>DEPT_NAME:
-        <input type="text" name="dept_name" id="dept_name" readonly />
-      </label>
-
+      <label>EMP_CODE: <input type="text" name="emp_code" id="emp_code" required /></label>
+      <label>EMP_NAME: <input type="text" name="emp_name" id="emp_name" readonly /></label>
+      <label>HOD: <input type="text" name="hod" id="hod" readonly /></label>
+      <label>DESIG_NAME: <input type="text" name="design_name" id="design_name" readonly /></label>
+      <label>DEPT_NAME: <input type="text" name="dept_name" id="dept_name" readonly /></label>
       <label>LEAVE TYPE:
         <select name="leave_type" id="leave_type" required>
           <option value="">--Select--</option>
           <option value="CL">CL</option>
           <option value="SL">SL</option>
           <option value="COFF">COFF</option>
-          <option value="OD(OUT SIDE DUTY)">OUT SIDE DUTY</option>
+          <option value="out side duty">out side duty</option>
         </select>
       </label>
-
-      <label>FROM DATE:
-        <input type="date" name="from_date" id="from_date" required />
-      </label>
-
-      <label>TO DATE:
-        <input type="date" name="to_date" id="to_date" required />
-      </label>
-
-      <label>REASON:
-        <input type="text" name="reason" id="reason" required />
-      </label>
-
-      <label>TAKEN LEAVE COUNT:
-        <input type="number" name="taken_leave_count" id="taken_leave_count" readonly />
-      </label>
-
-      <label>HOD MAIL ID:
-        <input type="email" name="hod_mail" id="hod_mail" readonly />
-      </label>
-
-      <label>USER MAIL:
-        <input type="email" name="user_mail" id="user_mail" readonly required />
-      </label>
-
+      <label>FROM DATE: <input type="date" name="from_date" id="from_date" required /></label>
+      <label>TO DATE: <input type="date" name="to_date" id="to_date" required /></label>
+      <label>REASON: <input type="text" name="reason" id="reason" required /></label>
+      <label>TAKEN LEAVE COUNT: <input type="number" name="taken_leave_count" id="taken_leave_count" readonly /></label>
+      <label>HOD MAIL ID: <input type="email" name="hod_mail" id="hod_mail" readonly /></label>
+      <label>USER MAIL: <input type="email" name="user_mail" id="user_mail" readonly required /></label>
       <p id="error"></p>
       <button type="submit">Submit</button>
     </form>
@@ -282,12 +201,10 @@
             form.design_name.value = emp.design_name;
             form.dept_name.value = emp.dept_name;
             form.hod_mail.value = emp.hod_mail;
-
             document.getElementById("cl_balance").innerText = emp.cl || 0;
             document.getElementById("sl_balance").innerText = emp.sl || 0;
             document.getElementById("coff_balance").innerText = emp.coff || 0;
             document.getElementById("total_balance").innerText = emp.total_leave || 0;
-
             form.dataset.cl = emp.cl || 0;
             form.dataset.sl = emp.sl || 0;
             form.dataset.coff = emp.coff || 0;
@@ -295,7 +212,7 @@
             alert("Employee not found");
           }
         })
-        .catch(err => alert("Error fetching employee data"))
+        .catch(() => alert("Error fetching employee data"))
         .finally(() => loading.style.display = "none");
     });
 
@@ -342,7 +259,6 @@
     document.getElementById("confirmYes").onclick = () => {
       confirmModal.style.display = "none";
       loading.style.display = "flex";
-
       const formData = new FormData(form);
 
       fetch(scriptURL, {
