@@ -1,3 +1,4 @@
+<!-- PASTE INTO YOUR GitHub HTML FILE OR LOCAL TEST -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -182,7 +183,7 @@
       if (!code) return;
 
       loading.style.display = "flex";
-      fetch(${scriptURL}?emp_code=${code})
+      fetch(`${scriptURL}?emp_code=${code}`)
         .then(res => res.json())
         .then(data => {
           empNameSelect.innerHTML = '<option value="">--Select Employee--</option>';
@@ -238,7 +239,7 @@
       form.taken_leave_count.value = days;
       const balance = parseInt(form.dataset[form.leave_type.value.toLowerCase()] || 0);
       if (form.leave_type.value !== "out side duty" && days > balance) {
-        document.getElementById("error").innerText = Insufficient ${form.leave_type.value} balance.;
+        document.getElementById("error").innerText = `Insufficient ${form.leave_type.value} balance.`;
       } else {
         document.getElementById("error").innerText = "";
       }
@@ -262,7 +263,7 @@
         .then(res => res.text())
         .then(msg => {
           alert(msg);
-          const mailto = mailto:${form.hod_mail.value}?subject=Leave Approval&body=Approve leave for ${empNameSelect.options[empNameSelect.selectedIndex].text} from ${form.from_date.value} to ${form.to_date.value};
+          const mailto = `mailto:${form.hod_mail.value}?subject=Leave Approval&body=Approve leave for ${empNameSelect.options[empNameSelect.selectedIndex].text} from ${form.from_date.value} to ${form.to_date.value}`;
           window.open(mailto);
           form.reset();
         })
