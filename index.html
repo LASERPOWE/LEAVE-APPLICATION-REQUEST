@@ -10,77 +10,61 @@
     html, body {
       margin: 0;
       padding: 0;
-      background: black;
-      color: white;
       height: 100%;
-      overflow: hidden;
+      background: #f0f0f0;
     }
-    video#bgVideo {
+    video.bg-video {
       position: fixed;
       right: 0;
       bottom: 0;
       min-width: 100%;
       min-height: 100%;
       z-index: -1;
+      object-fit: cover;
     }
     .form-container {
-      padding: 30px;
-      max-width: 700px;
-      margin: auto;
-      background: rgba(0, 0, 0, 0.8);
-      margin-top: 20px;
+      max-width: 600px;
+      margin: 5% auto;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 20px;
       border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     }
-    label {
-      display: block;
-      margin: 10px 0 5px;
-    }
-    input, select, textarea {
+    input, select, button {
       width: 100%;
       padding: 10px;
+      margin: 8px 0;
       border-radius: 5px;
-      border: none;
-      margin-bottom: 15px;
+      border: 1px solid #ccc;
     }
     button {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 5px;
-      background: #28a745;
+      background-color: #28a745;
       color: white;
-      font-size: 16px;
+      font-weight: bold;
       cursor: pointer;
     }
-    .spinner-overlay {
+    button:hover {
+      background-color: #218838;
+    }
+    .loading-overlay {
       display: none;
       position: fixed;
-      z-index: 999;
       top: 0; left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.7);
-      justify-content: center;
+      width: 100%; height: 100%;
+      background: rgba(255,255,255,0.8);
+      z-index: 9999;
       align-items: center;
-    }
-    .spinner {
-      border: 8px solid #f3f3f3;
-      border-top: 8px solid #3498db;
-      border-radius: 50%;
-      width: 60px;
-      height: 60px;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      justify-content: center;
+      font-size: 1.5em;
+      font-weight: bold;
+      color: #333;
     }
     #authOverlay {
       position: fixed;
       top: 0; left: 0;
-      width: 100%;
-      height: 100%;
-      background: black;
-      z-index: 1000;
+      width: 100%; height: 100%;
+      background: white;
+      z-index: 9999;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -88,88 +72,82 @@
   </style>
 </head>
 <body>
-  <video autoplay muted loop id="bgVideo">
-    <source src="https://www.w3schools.com/howto/rain.mp4" type="video/mp4">
+  <video autoplay muted loop class="bg-video">
+    <source src="background.mp4" type="video/mp4">
   </video>
 
   <div id="authOverlay">
     <div id="g_id_onload"
-         data-client_id="64477546600-5r6mfqjqgo7mfddgvb94cfbml23nd67b.apps.googleusercontent.com"
-         data-context="signin"
-         data-callback="handleCredentialResponse"
-         data-auto_prompt="false">
+         data-client_id="819720991947-gqobkscn6pt2uhik6lv2pq5ijjuj3ttc.apps.googleusercontent.com"
+         data-callback="handleCredentialResponse">
     </div>
-    <div class="g_id_signin"
-         data-type="standard"
-         data-shape="rectangular"
-         data-theme="outline"
-         data-text="sign_in_with"
-         data-size="large"
-         data-logo_alignment="left">
-    </div>
+    <div class="g_id_signin" data-type="standard"></div>
   </div>
 
-  <div class="spinner-overlay" id="loading"><div class="spinner"></div></div>
+  <div class="loading-overlay" id="loading">Loading...</div>
 
   <div class="form-container" style="display:none;">
     <form id="leaveForm">
-      <label>EMP CODE</label>
-      <input type="text" name="emp_code" id="emp_code" required>
+      <label for="emp_code">EMP CODE:</label>
+      <input type="text" id="emp_code" name="emp_code" required />
 
-      <label>EMP NAME</label>
-      <select name="emp_name" id="emp_name" required></select>
+      <label for="emp_name">EMP NAME:</label>
+      <select id="emp_name" name="emp_name" required>
+        <option value="">--Select Employee--</option>
+      </select>
 
-      <label>HOD</label>
-      <input type="text" name="hod" id="hod" readonly>
+      <label for="hod">HOD:</label>
+      <input type="text" id="hod" name="hod" readonly />
 
-      <label>DESIG NAME</label>
-      <input type="text" name="desig_name" id="desig_name" readonly>
+      <label for="desig_name">DESIGNATION:</label>
+      <input type="text" id="desig_name" name="desig_name" readonly />
 
-      <label>DEPT NAME</label>
-      <input type="text" name="dept_name" id="dept_name" readonly>
+      <label for="dept_name">DEPARTMENT:</label>
+      <input type="text" id="dept_name" name="dept_name" readonly />
 
-      <label>LEAVE TYPE</label>
-      <select name="leave_type" id="leave_type" required>
-        <option value="">--SELECT--</option>
+      <label for="leave_type">LEAVE TYPE:</label>
+      <select id="leave_type" name="leave_type" required>
         <option value="CL">CL</option>
         <option value="SL">SL</option>
         <option value="COFF">COFF</option>
       </select>
 
-      <label>FROM DATE</label>
-      <input type="date" name="from_date" id="from_date" required>
+      <label for="from_date">FROM DATE:</label>
+      <input type="date" id="from_date" name="from_date" required />
 
-      <label>TO DATE</label>
-      <input type="date" name="to_date" id="to_date" required>
+      <label for="to_date">TO DATE:</label>
+      <input type="date" id="to_date" name="to_date" required />
 
-      <label>REASON</label>
-      <textarea name="reason" id="reason" rows="3" required></textarea>
+      <label for="reason">REASON:</label>
+      <input type="text" id="reason" name="reason" required />
 
-      <label>TAKEN LEAVE COUNT</label>
-      <input type="number" name="leave_count" id="leave_count" readonly>
+      <label for="leave_count">TAKEN LEAVE COUNT:</label>
+      <input type="number" id="leave_count" name="leave_count" readonly />
 
-      <input type="hidden" name="hod_mail" id="hod_mail">
-      <input type="hidden" name="user_mail" id="user_mail">
+      <input type="hidden" id="hod_mail" name="hod_mail" />
+      <input type="hidden" id="user_mail" name="user_mail" />
 
-      <button type="submit">Submit Leave Application</button>
+      <button type="submit">Submit</button>
     </form>
   </div>
 
   <script>
-    const scriptURL = "https://script.google.com/macros/s/AKfycbyOPuaoagCUk5BDCTgd74OGeWiRZpnpIt8WAl8tD3Efqj6qAqgzyCDqWfkqFeD9XAw4nw/exec";
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbwo_9o4UxgcQfFxQtEHPb9351an-SoYQQ3d2CfeWh4v0Qr-BHHXzjtp9ccEGULNC_AfNw/exec';
     const form = document.getElementById("leaveForm");
     const empNameSelect = document.getElementById("emp_name");
     const loading = document.getElementById("loading");
+    const authOverlay = document.getElementById("authOverlay");
+
     let matchedEmployees = [];
 
     function handleCredentialResponse(response) {
-      const decoded = JSON.parse(atob(response.credential.split('.')[1]));
-      const email = decoded.email;
+      const data = JSON.parse(atob(response.credential.split('.')[1]));
+      const email = data.email;
       if (email) {
         localStorage.setItem("user_mail", email);
         document.getElementById("user_mail").value = email;
         document.querySelector(".form-container").style.display = "block";
-        document.getElementById("authOverlay").style.display = "none";
+        authOverlay.style.display = "none";
       }
     }
 
@@ -178,7 +156,7 @@
       if (email) {
         document.getElementById("user_mail").value = email;
         document.querySelector(".form-container").style.display = "block";
-        document.getElementById("authOverlay").style.display = "none";
+        authOverlay.style.display = "none";
       }
     };
 
@@ -190,76 +168,83 @@
       fetch(`${scriptURL}?emp_code=${code}`)
         .then(res => res.json())
         .then(data => {
+          loading.style.display = "none";
           empNameSelect.innerHTML = '<option value="">--Select Employee--</option>';
           matchedEmployees = Array.isArray(data.employees) ? data.employees : [];
 
-          const seen = new Set();
-          matchedEmployees.forEach(emp => {
-            if (!seen.has(emp.emp_name)) {
-              const option = document.createElement("option");
-              option.value = emp.emp_name;
-              option.text = emp.emp_name;
-              empNameSelect.appendChild(option);
-              seen.add(emp.emp_name);
-            }
+          matchedEmployees.forEach((emp, i) => {
+            const opt = document.createElement("option");
+            opt.value = emp.emp_name;
+            opt.textContent = emp.emp_name;
+            empNameSelect.appendChild(opt);
           });
 
-          loading.style.display = "none";
+          if (matchedEmployees.length === 1) {
+            empNameSelect.value = matchedEmployees[0].emp_name;
+            fillEmployeeData(matchedEmployees[0]);
+          }
         })
         .catch(err => {
-          console.error("Fetch error:", err);
           loading.style.display = "none";
+          alert("Error fetching employee data.");
         });
     });
 
     empNameSelect.addEventListener("change", () => {
-      const selected = empNameSelect.value;
-      const emp = matchedEmployees.find(e => e.emp_name === selected);
-      if (emp) {
-        form.hod.value = emp.hod || "";
-        form.desig_name.value = emp.desig_name || "";
-        form.dept_name.value = emp.dept_name || "";
-        form.hod_mail.value = emp.hod_mail || "";
-      }
+      const selected = matchedEmployees.find(e => e.emp_name === empNameSelect.value);
+      if (selected) fillEmployeeData(selected);
     });
 
-    document.getElementById("to_date").addEventListener("change", calculateLeaveCount);
-    document.getElementById("from_date").addEventListener("change", calculateLeaveCount);
+    function fillEmployeeData(emp) {
+      form.hod.value = emp.hod;
+      form.desig_name.value = emp.desig_name;
+      form.dept_name.value = emp.dept_name;
+      form.hod_mail.value = emp.hod_mail;
+    }
 
-    function calculateLeaveCount() {
+    function calculateLeaveDays() {
       const from = new Date(form.from_date.value);
       const to = new Date(form.to_date.value);
-      if (from && to && to >= from) {
-        const diff = Math.floor((to - from) / (1000 * 60 * 60 * 24)) + 1;
-        form.leave_count.value = diff;
-      } else {
-        form.leave_count.value = "";
+      if (!isNaN(from) && !isNaN(to)) {
+        if (to < from) {
+          alert("TO DATE cannot be before FROM DATE.");
+          form.to_date.value = "";
+          form.leave_count.value = "";
+        } else {
+          const diff = (to - from) / (1000 * 3600 * 24) + 1;
+          form.leave_count.value = diff;
+        }
       }
     }
 
-    form.addEventListener("submit", (e) => {
+    form.from_date.addEventListener("change", calculateLeaveDays);
+    form.to_date.addEventListener("change", calculateLeaveDays);
+
+    form.addEventListener("submit", e => {
       e.preventDefault();
       loading.style.display = "flex";
 
       const formData = new FormData(form);
-      const data = Object.fromEntries(formData.entries());
+      const jsonData = Object.fromEntries(formData.entries());
 
       fetch(scriptURL, {
         method: "POST",
-        body: JSON.stringify(data),
-        headers: {
-          "Content-Type": "application/json"
-        }
-      }).then(res => res.text())
-        .then(msg => {
-          alert("Leave request submitted successfully.");
-          form.reset();
-          empNameSelect.innerHTML = '';
+        body: JSON.stringify(jsonData),
+        headers: { "Content-Type": "application/json" },
+      })
+        .then(response => {
           loading.style.display = "none";
-        }).catch(err => {
+          if (response.ok) {
+            alert("Leave request submitted successfully.");
+            form.reset();
+            empNameSelect.innerHTML = '<option value="">--Select Employee--</option>';
+          } else {
+            alert("Submission failed.");
+          }
+        })
+        .catch(err => {
+          loading.style.display = "none";
           alert("Error submitting form.");
-          console.error(err);
-          loading.style.display = "none";
         });
     });
   </script>
