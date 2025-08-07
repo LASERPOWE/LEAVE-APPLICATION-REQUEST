@@ -3,331 +3,122 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Leave Application Form</title>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <title>Leave Application</title>
   <style>
-    * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-    html, body { margin: 0; padding: 0; height: 100%; }
-
-    video#bg-video {
-      position: fixed;
-      top: 0;
-      left: 0;
-      min-width: 100vw;
-      min-height: 100vh;
-      z-index: -1;
-      object-fit: cover;
-      opacity: 0.5;
-    }
-
-    #authOverlay {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background-color: rgba(0, 0, 0, 0.85);
-      z-index: 10000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      flex-direction: column;
-    }
-
-    .form-container {
-      max-width: 600px;
-      background: rgba(255, 255, 255, 0.95);
-      padding: 30px;
-      margin: 50px auto;
-      border-radius: 12px;
-      box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
-    }
-
-    h2 { text-align: center; }
-    label { display: block; margin-bottom: 12px; font-weight: 500; }
-    input, select {
-      width: 100%; padding: 10px; margin-top: 5px;
-      border: 1px solid #ccc; border-radius: 8px;
-    }
-
-    input[readonly] { background-color: #f9f9f9; }
-    button {
-      width: 100%; padding: 12px; background-color: #1e88e5;
-      color: white; border: none; border-radius: 8px;
-      font-size: 16px; cursor: pointer; margin-top: 15px;
-    }
-    button:hover { background-color: #1565c0; }
-    #error { color: red; text-align: center; margin-top: 10px; }
-
-    .balance-info {
-      margin: 10px 0; padding: 10px;
-      background-color: #f1f1f1; border-radius: 8px;
-      font-weight: bold;
-    }
-
-    #loading {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background-color: rgba(0,0,0,0.6); z-index: 999;
-      display: none; align-items: center; justify-content: center;
-      color: white; font-size: 24px;
-    }
-
-    #confirmModal {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.6); display: none;
-      z-index: 1000; justify-content: center; align-items: center;
-    }
-
-    #confirmBox {
-      background: white; padding: 20px; border-radius: 10px;
-      text-align: center;
-    }
-
-    #confirmBox button { margin: 10px; width: auto; }
-
-    @media (max-width: 600px) {
-      .form-container { margin: 20px; padding: 20px; }
-    }
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .hidden { display: none; }
+    label { display: block; margin-top: 10px; }
+    input, select { width: 300px; padding: 5px; }
   </style>
 </head>
 <body>
-  <video autoplay muted loop id="bg-video">
-    <source src="https://laserpowerinfra.com/frontassets/img/slider/Banner_v04_HD_L.mp4" type="video/mp4">
-  </video>
+  <h2>Leave Application Form</h2>
 
-  <div id="loading">Loading...</div>
+  <label for="emp_code">Enter Employee Code:</label>
+  <input type="text" id="emp_code" />
+  <button onclick="fetchEmployeeData()">Fetch</button>
 
-  <div id="authOverlay">
-    <div id="g_id_onload"
-         data-client_id="995677134206-i3n2k43cvsr48ngjb6t69s7tsr0sivpj.apps.googleusercontent.com"
-         data-callback="handleCredentialResponse"
-         data-auto_prompt="true">
-    </div>
-    <div class="g_id_signin" data-type="standard" data-size="large"
-         data-theme="outline" data-text="sign_in_with"
-         data-shape="rectangular" data-logo_alignment="left">
-    </div>
-    <p>Please sign in to continue.</p>
+  <div id="employeeSelector" class="hidden">
+    <label for="employeeDropdown">Multiple employees found. Select one:</label>
+    <select id="employeeDropdown" onchange="selectEmployee()"></select>
   </div>
 
-  <div id="confirmModal">
-    <div id="confirmBox">
-      <p>Are you sure you want to submit the leave request?</p>
-      <button id="confirmYes">Yes</button>
-      <button id="confirmNo">No</button>
-    </div>
-  </div>
+  <div id="formFields" class="hidden">
+    <label for="emp_name">Employee Name:</label>
+    <input type="text" id="emp_name" readonly />
 
-  <div class="form-container" style="display:none;">
-    <h2>Leave Application Form</h2>
+    <label for="hod">HOD:</label>
+    <input type="text" id="hod" readonly />
 
-    <div class="balance-info">
-      CL: <span id="cl_balance">-</span> |
-      SL: <span id="sl_balance">-</span> |
-      COFF: <span id="coff_balance">-</span> |
-      Total: <span id="total_balance">-</span>
-    </div>
+    <label for="design_name">Designation:</label>
+    <input type="text" id="design_name" readonly />
 
-    <form id="leaveForm">
-      <label>EMP_CODE: <input type="text" name="emp_code" id="emp_code" required /></label>
+    <label for="dept_name">Department:</label>
+    <input type="text" id="dept_name" readonly />
 
-      <label>EMP_NAME:
-        <select id="emp_name_select" name="emp_name" style="display:none;"></select>
-        <input type="text" id="emp_name" name="emp_name" readonly />
-      </label>
+    <label for="hod_mail">HOD Email:</label>
+    <input type="text" id="hod_mail" readonly />
 
-      <label>HOD: <input type="text" name="hod" id="hod" readonly /></label>
-      <label>DESIG_NAME: <input type="text" name="design_name" id="design_name" readonly /></label>
-      <label>DEPT_NAME: <input type="text" name="dept_name" id="dept_name" readonly /></label>
-      <label>LEAVE TYPE:
-        <select name="leave_type" id="leave_type" required>
-          <option value="">--Select--</option>
-          <option value="CL">CL</option>
-          <option value="SL">SL</option>
-          <option value="COFF">COFF</option>
-          <option value="out side duty">out side duty</option>
-        </select>
-      </label>
-      <label>FROM DATE: <input type="date" name="from_date" id="from_date" required /></label>
-      <label>TO DATE: <input type="date" name="to_date" id="to_date" required /></label>
-      <label>REASON: <input type="text" name="reason" id="reason" required /></label>
-      <label>TAKEN LEAVE COUNT: <input type="number" name="taken_leave_count" id="taken_leave_count" readonly /></label>
-      <label>HOD MAIL ID: <input type="email" name="hod_mail" id="hod_mail" readonly /></label>
-      <label>USER MAIL: <input type="email" name="user_mail" id="user_mail" required /></label>
-      <p id="error"></p>
-      <button type="submit">Submit</button>
-    </form>
+    <label for="cl">CL Balance:</label>
+    <input type="text" id="cl" readonly />
+
+    <label for="sl">SL Balance:</label>
+    <input type="text" id="sl" readonly />
+
+    <label for="coff">COFF Balance:</label>
+    <input type="text" id="coff" readonly />
+
+    <label for="total_leave">Total Leave:</label>
+    <input type="text" id="total_leave" readonly />
   </div>
 
   <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbw4h_oe1z_Is3n_woFVUAFdooMqpRoMYBSRxFlmb-gIqe3mtwL-mduch7rynwnJGapK5g/exec';
-    const form = document.getElementById("leaveForm");
-    const loading = document.getElementById("loading");
-    const confirmModal = document.getElementById("confirmModal");
+    let employeeList = [];
 
-    window.onload = () => {
-      const storedEmail = localStorage.getItem("user_mail");
-      if (storedEmail) {
-        document.getElementById("user_mail").value = storedEmail;
-        document.querySelector(".form-container").style.display = "block";
-        document.getElementById("authOverlay").style.display = "none";
+    async function fetchEmployeeData() {
+      const empCode = document.getElementById('emp_code').value.trim();
+      if (!empCode) {
+        alert("Please enter Employee Code.");
+        return;
       }
-    };
 
-    function handleCredentialResponse(response) {
-      const decoded = parseJwt(response.credential);
-      const email = decoded.email;
-      if (email) {
-        localStorage.setItem("user_mail", email);
-        document.getElementById("user_mail").value = email;
-        document.querySelector(".form-container").style.display = "block";
-        document.getElementById("authOverlay").style.display = "none";
-      }
-    }
+      const url = `https://script.google.com/macros/s/AKfycbwo_9o4UxgcQfFxQtEHPb9351an-SoYQQ3d2CfeWh4v0Qr-BHHXzjtp9ccEGULNC_AfNw/exec?emp_code=${empCode}`;
 
-    function parseJwt(token) {
-      const base64Url = token.split('.')[1];
-      const base64 = decodeURIComponent(atob(base64Url).split('').map(c =>
-        '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
-      return JSON.parse(base64);
-    }
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
 
-    document.getElementById("emp_code").addEventListener("change", function () {
-      const empCode = this.value.trim();
-      if (!empCode) return;
+        if (data.found && data.employees.length > 0) {
+          employeeList = data.employees;
 
-      loading.style.display = "flex";
-      fetch(`${scriptURL}?emp_code=${empCode}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.found) {
-            const employees = data.employees;
-
-            if (employees.length === 1) {
-              document.getElementById("emp_name").style.display = "block";
-              document.getElementById("emp_name_select").style.display = "none";
-              populateEmployeeForm(employees[0]);
-            } else {
-              const empSelect = document.getElementById("emp_name_select");
-              empSelect.innerHTML = "";
-              empSelect.style.display = "block";
-              document.getElementById("emp_name").style.display = "none";
-
-              employees.forEach((emp, index) => {
-                const opt = document.createElement("option");
-                opt.value = index;
-                opt.text = emp.emp_name;
-                empSelect.appendChild(opt);
-              });
-
-              empSelect.onchange = () => {
-                const selectedEmp = employees[empSelect.value];
-                populateEmployeeForm(selectedEmp);
-                document.getElementById("emp_name").style.display = "block";
-                document.getElementById("emp_name_select").style.display = "none";
-              };
-
-              alert("Multiple employees found. Please select EMP_NAME.");
-            }
+          if (employeeList.length === 1) {
+            // Only one match
+            populateForm(employeeList[0]);
+            document.getElementById('employeeSelector').classList.add('hidden');
+            document.getElementById('formFields').classList.remove('hidden');
           } else {
-            alert("Employee not found");
-            resetFormData();
+            // Multiple employees found
+            const dropdown = document.getElementById('employeeDropdown');
+            dropdown.innerHTML = '';
+
+            employeeList.forEach((emp, index) => {
+              const option = document.createElement('option');
+              option.value = index;
+              option.textContent = `${emp.emp_name} (${emp.dept_name})`;
+              dropdown.appendChild(option);
+            });
+
+            document.getElementById('employeeSelector').classList.remove('hidden');
+            document.getElementById('formFields').classList.remove('hidden');
+            populateForm(employeeList[0]); // Default select first
           }
-        })
-        .catch(() => alert("Error fetching employee data"))
-        .finally(() => loading.style.display = "none");
-    });
-
-    function populateEmployeeForm(emp) {
-      form.emp_name.value = emp.emp_name;
-      form.hod.value = emp.hod;
-      form.design_name.value = emp.design_name;
-      form.dept_name.value = emp.dept_name;
-      form.hod_mail.value = emp.hod_mail;
-      document.getElementById("cl_balance").innerText = emp.cl || 0;
-      document.getElementById("sl_balance").innerText = emp.sl || 0;
-      document.getElementById("coff_balance").innerText = emp.coff || 0;
-      document.getElementById("total_balance").innerText = emp.total_leave || 0;
-      form.dataset.cl = emp.cl || 0;
-      form.dataset.sl = emp.sl || 0;
-      form.dataset.coff = emp.coff || 0;
-    }
-
-    function resetFormData() {
-      form.emp_name.value = "";
-      form.hod.value = "";
-      form.design_name.value = "";
-      form.dept_name.value = "";
-      form.hod_mail.value = "";
-      document.getElementById("cl_balance").innerText = "-";
-      document.getElementById("sl_balance").innerText = "-";
-      document.getElementById("coff_balance").innerText = "-";
-      document.getElementById("total_balance").innerText = "-";
-    }
-
-    function calculateLeave() {
-      const from = new Date(form.from_date.value);
-      const to = new Date(form.to_date.value);
-      const leaveType = form.leave_type.value;
-
-      if (isNaN(from.getTime()) || isNaN(to.getTime())) return;
-      if (to < from) {
-        document.getElementById("error").innerText = "TO DATE cannot be before FROM DATE";
-        form.taken_leave_count.value = "";
-        return;
-      }
-
-      const days = (to - from) / (1000 * 60 * 60 * 24) + 1;
-      form.taken_leave_count.value = days;
-
-      if (leaveType.toLowerCase() === "out side duty") {
-        document.getElementById("error").innerText = "";
-      } else {
-        const balance = parseFloat(form.dataset[leaveType?.toLowerCase()] || 0);
-        if (days > balance) {
-          document.getElementById("error").innerText = `Insufficient ${leaveType} balance. Available: ${balance}`;
         } else {
-          document.getElementById("error").innerText = "";
+          alert("No employee found with that code.");
+          document.getElementById('formFields').classList.add('hidden');
+          document.getElementById('employeeSelector').classList.add('hidden');
         }
+      } catch (error) {
+        console.error("Error fetching employee data:", error);
+        alert("Failed to fetch employee data.");
       }
     }
 
-    form.from_date.addEventListener("change", calculateLeave);
-    form.to_date.addEventListener("change", calculateLeave);
-    form.leave_type.addEventListener("change", calculateLeave);
+    function selectEmployee() {
+      const index = document.getElementById('employeeDropdown').value;
+      populateForm(employeeList[index]);
+    }
 
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
-      if (document.getElementById("error").innerText) {
-        alert("Fix errors before submitting.");
-        return;
-      }
-      confirmModal.style.display = "flex";
-    });
-
-    document.getElementById("confirmYes").onclick = () => {
-      confirmModal.style.display = "none";
-      loading.style.display = "flex";
-      const formData = new FormData(form);
-
-      fetch(scriptURL, {
-        method: "POST",
-        body: formData
-      })
-        .then(res => res.text())
-        .then(msg => {
-          alert(msg);
-          const mailto = `mailto:${form.hod_mail.value}?subject=Leave Approval Request&body=Please approve or reject the leave request for ${form.emp_name.value} (${form.emp_code.value}) from ${form.from_date.value} to ${form.to_date.value}%0A%0A[Approve]%0A[Reject]`;
-          window.open(mailto);
-          form.reset();
-          resetFormData();
-        })
-        .catch(err => alert("Submission failed: " + err.message))
-        .finally(() => loading.style.display = "none");
-    };
-
-    document.getElementById("confirmNo").onclick = () => {
-      confirmModal.style.display = "none";
-    };
+    function populateForm(emp) {
+      document.getElementById('emp_name').value = emp.emp_name;
+      document.getElementById('hod').value = emp.hod;
+      document.getElementById('design_name').value = emp.design_name;
+      document.getElementById('dept_name').value = emp.dept_name;
+      document.getElementById('hod_mail').value = emp.hod_mail;
+      document.getElementById('cl').value = emp.cl;
+      document.getElementById('sl').value = emp.sl;
+      document.getElementById('coff').value = emp.coff;
+      document.getElementById('total_leave').value = emp.total_leave;
+    }
   </script>
 </body>
 </html>
