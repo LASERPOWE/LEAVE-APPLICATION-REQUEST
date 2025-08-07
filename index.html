@@ -3,122 +3,326 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Leave Application</title>
+  <title>Leave Application Form</title>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    .hidden { display: none; }
-    label { display: block; margin-top: 10px; }
-    input, select { width: 300px; padding: 5px; }
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body, html {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background: #000;
+    }
+
+    video#bgVideo {
+      position: fixed;
+      top: 0;
+      left: 0;
+      object-fit: cover;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      opacity: 0.3;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      background-color: rgba(255, 255, 255, 0.92);
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    }
+
+    h2 {
+      text-align: center;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 15px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 6px;
+      border: 1px solid #aaa;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 12px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    #spinner {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.7);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #spinner div {
+      border: 8px solid #f3f3f3;
+      border-top: 8px solid #007bff;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    #leaveBalances {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    #confirmationModal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.6);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #confirmationBox {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    #confirmationBox button {
+      margin: 10px;
+    }
   </style>
 </head>
 <body>
+
+<video autoplay muted loop id="bgVideo">
+  <source src="https://www.w3schools.com/howto/rain.mp4" type="video/mp4" />
+</video>
+
+<div class="container">
   <h2>Leave Application Form</h2>
+  <form id="leaveForm">
+    <label>EMP CODE</label>
+    <input type="text" id="emp_code" name="emp_code" required />
 
-  <label for="emp_code">Enter Employee Code:</label>
-  <input type="text" id="emp_code" />
-  <button onclick="fetchEmployeeData()">Fetch</button>
+    <label>EMP NAME</label>
+    <input type="text" id="emp_name" name="emp_name" readonly required />
+    <select id="emp_name_select" style="display:none;"></select>
 
-  <div id="employeeSelector" class="hidden">
-    <label for="employeeDropdown">Multiple employees found. Select one:</label>
-    <select id="employeeDropdown" onchange="selectEmployee()"></select>
+    <label>HOD</label>
+    <input type="text" id="hod" name="hod" readonly required />
+
+    <label>DESIG NAME</label>
+    <input type="text" id="desig_name" name="desig_name" readonly required />
+
+    <label>DEPT NAME</label>
+    <input type="text" id="dept_name" name="dept_name" readonly required />
+
+    <label>LEAVE TYPE</label>
+    <select id="leave_type" name="leave_type" required>
+      <option value="">-- Select --</option>
+      <option value="CL">CL</option>
+      <option value="SL">SL</option>
+      <option value="COFF">COFF</option>
+    </select>
+
+    <label>FROM DATE</label>
+    <input type="date" id="from_date" name="from_date" required />
+
+    <label>TO DATE</label>
+    <input type="date" id="to_date" name="to_date" required />
+
+    <label>REASON</label>
+    <textarea id="reason" name="reason" required></textarea>
+
+    <label>TAKEN LEAVE COUNT</label>
+    <input type="number" id="leave_count" name="leave_count" readonly required />
+
+    <label>HOD MAIL</label>
+    <input type="email" id="hod_mail" name="hod_mail" readonly required />
+
+    <label>USER MAIL</label>
+    <input type="email" id="user_mail" name="user_mail" readonly required />
+
+    <div id="leaveBalances">
+      <div>CL: <span id="cl_balance">0</span></div>
+      <div>SL: <span id="sl_balance">0</span></div>
+      <div>COFF: <span id="coff_balance">0</span></div>
+      <div>TOTAL: <span id="total_balance">0</span></div>
+    </div>
+
+    <button type="submit">Submit</button>
+  </form>
+</div>
+
+<div id="spinner"><div></div></div>
+
+<div id="confirmationModal">
+  <div id="confirmationBox">
+    <p>Are you sure you want to submit?</p>
+    <button id="confirmSubmit">Yes</button>
+    <button onclick="document.getElementById('confirmationModal').style.display='none'">No</button>
   </div>
+</div>
 
-  <div id="formFields" class="hidden">
-    <label for="emp_name">Employee Name:</label>
-    <input type="text" id="emp_name" readonly />
+<script>
+  const form = document.getElementById("leaveForm");
+  const empCodeInput = document.getElementById("emp_code");
+  const empNameInput = document.getElementById("emp_name");
+  const empNameSelect = document.getElementById("emp_name_select");
 
-    <label for="hod">HOD:</label>
-    <input type="text" id="hod" readonly />
+  empCodeInput.addEventListener("change", fetchEmployeeData);
 
-    <label for="design_name">Designation:</label>
-    <input type="text" id="design_name" readonly />
-
-    <label for="dept_name">Department:</label>
-    <input type="text" id="dept_name" readonly />
-
-    <label for="hod_mail">HOD Email:</label>
-    <input type="text" id="hod_mail" readonly />
-
-    <label for="cl">CL Balance:</label>
-    <input type="text" id="cl" readonly />
-
-    <label for="sl">SL Balance:</label>
-    <input type="text" id="sl" readonly />
-
-    <label for="coff">COFF Balance:</label>
-    <input type="text" id="coff" readonly />
-
-    <label for="total_leave">Total Leave:</label>
-    <input type="text" id="total_leave" readonly />
-  </div>
-
-  <script>
-    let employeeList = [];
-
-    async function fetchEmployeeData() {
-      const empCode = document.getElementById('emp_code').value.trim();
-      if (!empCode) {
-        alert("Please enter Employee Code.");
-        return;
-      }
-
-      const url = `https://script.google.com/macros/s/AKfycbwo_9o4UxgcQfFxQtEHPb9351an-SoYQQ3d2CfeWh4v0Qr-BHHXzjtp9ccEGULNC_AfNw/exec?emp_code=${empCode}`;
-
-      try {
-        const response = await fetch(url);
-        const data = await response.json();
-
-        if (data.found && data.employees.length > 0) {
-          employeeList = data.employees;
-
-          if (employeeList.length === 1) {
-            // Only one match
-            populateForm(employeeList[0]);
-            document.getElementById('employeeSelector').classList.add('hidden');
-            document.getElementById('formFields').classList.remove('hidden');
-          } else {
-            // Multiple employees found
-            const dropdown = document.getElementById('employeeDropdown');
-            dropdown.innerHTML = '';
-
-            employeeList.forEach((emp, index) => {
-              const option = document.createElement('option');
-              option.value = index;
-              option.textContent = `${emp.emp_name} (${emp.dept_name})`;
-              dropdown.appendChild(option);
-            });
-
-            document.getElementById('employeeSelector').classList.remove('hidden');
-            document.getElementById('formFields').classList.remove('hidden');
-            populateForm(employeeList[0]); // Default select first
-          }
-        } else {
-          alert("No employee found with that code.");
-          document.getElementById('formFields').classList.add('hidden');
-          document.getElementById('employeeSelector').classList.add('hidden');
+  function fetchEmployeeData() {
+    const empCode = empCodeInput.value.trim();
+    if (!empCode) return;
+    showSpinner();
+    fetch(`https://script.google.com/macros/s/AKfycbwo_9o4UxgcQfFxQtEHPb9351an-SoYQQ3d2CfeWh4v0Qr-BHHXzjtp9ccEGULNC_AfNw/exec?emp_code=${empCode}`)
+      .then(res => res.json())
+      .then(data => {
+        hideSpinner();
+        if (!data.found) {
+          alert("Employee not found.");
+          return;
         }
-      } catch (error) {
-        console.error("Error fetching employee data:", error);
-        alert("Failed to fetch employee data.");
+        const employees = data.employees;
+        if (employees.length === 1) {
+          populateEmployeeForm(employees[0]);
+          empNameInput.value = employees[0].emp_name;
+          empNameInput.style.display = "block";
+          empNameSelect.style.display = "none";
+        } else {
+          empNameSelect.innerHTML = "<option disabled selected>Select Name</option>";
+          employees.forEach((emp, idx) => {
+            const opt = document.createElement("option");
+            opt.value = idx;
+            opt.textContent = emp.emp_name;
+            empNameSelect.appendChild(opt);
+          });
+          empNameInput.style.display = "none";
+          empNameSelect.style.display = "block";
+          empNameSelect.onchange = () => {
+            const selectedEmp = employees[empNameSelect.value];
+            empNameInput.value = selectedEmp.emp_name;
+            empNameInput.style.display = "block";
+            empNameSelect.style.display = "none";
+            populateEmployeeForm(selectedEmp);
+          };
+        }
+      })
+      .catch(err => {
+        hideSpinner();
+        alert("Error fetching employee data.");
+        console.error(err);
+      });
+  }
+
+  function populateEmployeeForm(emp) {
+    form.emp_name.value = emp.emp_name || "";
+    form.hod.value = emp.hod || "";
+    form.desig_name.value = emp.design_name || "";
+    form.dept_name.value = emp.dept_name || "";
+    form.hod_mail.value = emp.hod_mail || "";
+    form.user_mail.value = window.userEmail || "";
+    document.getElementById("cl_balance").textContent = emp.cl || 0;
+    document.getElementById("sl_balance").textContent = emp.sl || 0;
+    document.getElementById("coff_balance").textContent = emp.coff || 0;
+    document.getElementById("total_balance").textContent = emp.total_leave || 0;
+  }
+
+  function showSpinner() {
+    document.getElementById("spinner").style.display = "flex";
+  }
+
+  function hideSpinner() {
+    document.getElementById("spinner").style.display = "none";
+  }
+
+  document.getElementById("from_date").addEventListener("change", calcLeaveCount);
+  document.getElementById("to_date").addEventListener("change", calcLeaveCount);
+
+  function calcLeaveCount() {
+    const from = new Date(form.from_date.value);
+    const to = new Date(form.to_date.value);
+    if (from && to && from <= to) {
+      const count = Math.floor((to - from) / (1000 * 60 * 60 * 24)) + 1;
+      form.leave_count.value = count;
+    } else {
+      form.leave_count.value = "";
+    }
+  }
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    document.getElementById("confirmationModal").style.display = "flex";
+  });
+
+  document.getElementById("confirmSubmit").onclick = function () {
+    document.getElementById("confirmationModal").style.display = "none";
+    showSpinner();
+    const formData = Object.fromEntries(new FormData(form).entries());
+    fetch("https://script.google.com/macros/s/AKfycbwo_9o4UxgcQfFxQtEHPb9351an-SoYQQ3d2CfeWh4v0Qr-BHHXzjtp9ccEGULNC_AfNw/exec", {
+      method: "POST",
+      body: JSON.stringify(formData),
+      headers: { "Content-Type": "application/json" }
+    })
+    .then(res => res.text())
+    .then(msg => {
+      hideSpinner();
+      alert("Submitted successfully!");
+      form.reset();
+    })
+    .catch(err => {
+      hideSpinner();
+      alert("Submission failed.");
+      console.error(err);
+    });
+  };
+
+  window.onload = function () {
+    google.accounts.id.initialize({
+      client_id: "YOUR_CLIENT_ID_HERE",
+      callback: (response) => {
+        const token = response.credential;
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        window.userEmail = payload.email;
+        document.getElementById("user_mail").value = window.userEmail;
       }
-    }
+    });
+    google.accounts.id.prompt();
+  };
+</script>
 
-    function selectEmployee() {
-      const index = document.getElementById('employeeDropdown').value;
-      populateForm(employeeList[index]);
-    }
-
-    function populateForm(emp) {
-      document.getElementById('emp_name').value = emp.emp_name;
-      document.getElementById('hod').value = emp.hod;
-      document.getElementById('design_name').value = emp.design_name;
-      document.getElementById('dept_name').value = emp.dept_name;
-      document.getElementById('hod_mail').value = emp.hod_mail;
-      document.getElementById('cl').value = emp.cl;
-      document.getElementById('sl').value = emp.sl;
-      document.getElementById('coff').value = emp.coff;
-      document.getElementById('total_leave').value = emp.total_leave;
-    }
-  </script>
 </body>
 </html>
