@@ -7,147 +7,165 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      background: #f0f0f0;
-    }
-    video.bg-video {
+    html, body { margin: 0; padding: 0; height: 100%; }
+
+    video#bg-video {
       position: fixed;
-      right: 0;
-      bottom: 0;
-      min-width: 100%;
-      min-height: 100%;
-      z-index: -1;
-      object-fit: cover;
+      top: 0; left: 0;
+      min-width: 100vw; min-height: 100vh;
+      z-index: -1; object-fit: cover; opacity: 0.5;
     }
+
+    #authOverlay {
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0, 0, 0, 0.85);
+      z-index: 10000;
+      display: flex; align-items: center; justify-content: center;
+      color: white; flex-direction: column;
+    }
+
     .form-container {
       max-width: 600px;
-      margin: 5% auto;
       background: rgba(255, 255, 255, 0.95);
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      padding: 30px; margin: 50px auto;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
     }
-    input, select, button {
-      width: 100%;
-      padding: 10px;
-      margin: 8px 0;
-      border-radius: 5px;
-      border: 1px solid #ccc;
+
+    h2 { text-align: center; }
+    label { display: block; margin-bottom: 12px; font-weight: 500; }
+    input, select {
+      width: 100%; padding: 10px; margin-top: 5px;
+      border: 1px solid #ccc; border-radius: 8px;
     }
+
+    input[readonly] { background-color: #f9f9f9; }
     button {
-      background-color: #28a745;
-      color: white;
+      width: 100%; padding: 12px; background-color: #1e88e5;
+      color: white; border: none; border-radius: 8px;
+      font-size: 16px; cursor: pointer; margin-top: 15px;
+    }
+    button:hover { background-color: #1565c0; }
+    #error { color: red; text-align: center; margin-top: 10px; }
+
+    .balance-info {
+      margin: 10px 0; padding: 10px;
+      background-color: #f1f1f1; border-radius: 8px;
       font-weight: bold;
-      cursor: pointer;
     }
-    button:hover {
-      background-color: #218838;
+
+    #loading {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.6); z-index: 999;
+      display: none; align-items: center; justify-content: center;
+      color: white; font-size: 24px;
     }
-    .loading-overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(255,255,255,0.8);
-      z-index: 9999;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5em;
-      font-weight: bold;
-      color: #333;
+
+    #confirmModal {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.6); display: none;
+      z-index: 1000; justify-content: center; align-items: center;
     }
-    #authOverlay {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: white;
-      z-index: 9999;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+
+    #confirmBox {
+      background: white; padding: 20px; border-radius: 10px;
+      text-align: center;
+    }
+
+    #confirmBox button { margin: 10px; width: auto; }
+
+    @media (max-width: 600px) {
+      .form-container { margin: 20px; padding: 20px; }
     }
   </style>
 </head>
 <body>
-  <video autoplay muted loop class="bg-video">
-    <source src="background.mp4" type="video/mp4">
+  <video autoplay muted loop id="bg-video">
+    <source src="https://laserpowerinfra.com/frontassets/img/slider/Banner_v04_HD_L.mp4" type="video/mp4">
   </video>
+
+  <div id="loading">Loading...</div>
 
   <div id="authOverlay">
     <div id="g_id_onload"
-         data-client_id="819720991947-gqobkscn6pt2uhik6lv2pq5ijjuj3ttc.apps.googleusercontent.com"
-         data-callback="handleCredentialResponse">
+         data-client_id="995677134206-i3n2k43cvsr48ngjb6t69s7tsr0sivpj.apps.googleusercontent.com"
+         data-callback="handleCredentialResponse"
+         data-auto_prompt="true">
     </div>
-    <div class="g_id_signin" data-type="standard"></div>
+    <div class="g_id_signin" data-type="standard" data-size="large"
+         data-theme="outline" data-text="sign_in_with"
+         data-shape="rectangular" data-logo_alignment="left">
+    </div>
+    <p>Please sign in to continue.</p>
   </div>
 
-  <div class="loading-overlay" id="loading">Loading...</div>
+  <div id="confirmModal">
+    <div id="confirmBox">
+      <p>Are you sure you want to submit the leave request?</p>
+      <button id="confirmYes">Yes</button>
+      <button id="confirmNo">No</button>
+    </div>
+  </div>
 
   <div class="form-container" style="display:none;">
+    <h2>Leave Application Form</h2>
+
+    <div class="balance-info">
+      CL: <span id="cl_balance">-</span> |
+      SL: <span id="sl_balance">-</span> |
+      COFF: <span id="coff_balance">-</span> |
+      Total: <span id="total_balance">-</span>
+    </div>
+
     <form id="leaveForm">
-      <label for="emp_code">EMP CODE:</label>
-      <input type="text" id="emp_code" name="emp_code" required />
+      <label>EMP_CODE: <input type="text" name="emp_code" id="emp_code" required /></label>
 
-      <label for="emp_name">EMP NAME:</label>
-      <select id="emp_name" name="emp_name" required>
-        <option value="">--Select Employee--</option>
-      </select>
+      <label>EMP_NAME:
+        <select name="emp_name" id="emp_name" required>
+          <option value="">--Select Employee--</option>
+        </select>
+      </label>
 
-      <label for="hod">HOD:</label>
-      <input type="text" id="hod" name="hod" readonly />
-
-      <label for="desig_name">DESIGNATION:</label>
-      <input type="text" id="desig_name" name="desig_name" readonly />
-
-      <label for="dept_name">DEPARTMENT:</label>
-      <input type="text" id="dept_name" name="dept_name" readonly />
-
-      <label for="leave_type">LEAVE TYPE:</label>
-      <select id="leave_type" name="leave_type" required>
-        <option value="CL">CL</option>
-        <option value="SL">SL</option>
-        <option value="COFF">COFF</option>
-      </select>
-
-      <label for="from_date">FROM DATE:</label>
-      <input type="date" id="from_date" name="from_date" required />
-
-      <label for="to_date">TO DATE:</label>
-      <input type="date" id="to_date" name="to_date" required />
-
-      <label for="reason">REASON:</label>
-      <input type="text" id="reason" name="reason" required />
-
-      <label for="leave_count">TAKEN LEAVE COUNT:</label>
-      <input type="number" id="leave_count" name="leave_count" readonly />
-
-      <input type="hidden" id="hod_mail" name="hod_mail" />
-      <input type="hidden" id="user_mail" name="user_mail" />
-
+      <label>HOD: <input type="text" name="hod" id="hod" readonly /></label>
+      <label>DESIG_NAME: <input type="text" name="design_name" id="design_name" readonly /></label>
+      <label>DEPT_NAME: <input type="text" name="dept_name" id="dept_name" readonly /></label>
+      <label>LEAVE TYPE:
+        <select name="leave_type" id="leave_type" required>
+          <option value="">--Select--</option>
+          <option value="CL">CL</option>
+          <option value="SL">SL</option>
+          <option value="COFF">COFF</option>
+          <option value="out side duty">out side duty</option>
+        </select>
+      </label>
+      <label>FROM DATE: <input type="date" name="from_date" id="from_date" required /></label>
+      <label>TO DATE: <input type="date" name="to_date" id="to_date" required /></label>
+      <label>REASON: <input type="text" name="reason" id="reason" required /></label>
+      <label>TAKEN LEAVE COUNT: <input type="number" name="taken_leave_count" id="taken_leave_count" readonly /></label>
+      <label>HOD MAIL ID: <input type="email" name="hod_mail" id="hod_mail" readonly /></label>
+      <label>USER MAIL: <input type="email" name="user_mail" id="user_mail" required /></label>
+      <p id="error"></p>
       <button type="submit">Submit</button>
     </form>
   </div>
 
   <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbwo_9o4UxgcQfFxQtEHPb9351an-SoYQQ3d2CfeWh4v0Qr-BHHXzjtp9ccEGULNC_AfNw/exec';
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbyOPuaoagCUk5BDCTgd74OGeWiRZpnpIt8WAl8tD3Efqj6qAqgzyCDqWfkqFeD9XAw4nw/exec';
     const form = document.getElementById("leaveForm");
-    const empNameSelect = document.getElementById("emp_name");
     const loading = document.getElementById("loading");
-    const authOverlay = document.getElementById("authOverlay");
-
+    const confirmModal = document.getElementById("confirmModal");
+    const empNameSelect = document.getElementById("emp_name");
     let matchedEmployees = [];
 
     function handleCredentialResponse(response) {
-      const data = JSON.parse(atob(response.credential.split('.')[1]));
-      const email = data.email;
+      const decoded = JSON.parse(atob(response.credential.split('.')[1]));
+      const email = decoded.email;
       if (email) {
         localStorage.setItem("user_mail", email);
         document.getElementById("user_mail").value = email;
         document.querySelector(".form-container").style.display = "block";
-        authOverlay.style.display = "none";
+        document.getElementById("authOverlay").style.display = "none";
       }
     }
 
@@ -156,7 +174,7 @@
       if (email) {
         document.getElementById("user_mail").value = email;
         document.querySelector(".form-container").style.display = "block";
-        authOverlay.style.display = "none";
+        document.getElementById("authOverlay").style.display = "none";
       }
     };
 
@@ -165,88 +183,92 @@
       if (!code) return;
       loading.style.display = "flex";
 
-      fetch(`${scriptURL}?emp_code=${code}`)
+      fetch(${scriptURL}?emp_code=${code})
         .then(res => res.json())
         .then(data => {
-          loading.style.display = "none";
           empNameSelect.innerHTML = '<option value="">--Select Employee--</option>';
-          matchedEmployees = Array.isArray(data.employees) ? data.employees : [];
-
-          matchedEmployees.forEach((emp, i) => {
-            const opt = document.createElement("option");
-            opt.value = emp.emp_name;
-            opt.textContent = emp.emp_name;
-            empNameSelect.appendChild(opt);
-          });
-
-          if (matchedEmployees.length === 1) {
-            empNameSelect.value = matchedEmployees[0].emp_name;
-            fillEmployeeData(matchedEmployees[0]);
+          matchedEmployees = data.employees || [];
+          if (data.found && matchedEmployees.length > 0) {
+            matchedEmployees.forEach((emp) => {
+              const option = document.createElement("option");
+              option.value = emp.emp_name;
+              option.textContent = emp.emp_name;
+              empNameSelect.appendChild(option);
+            });
+          } else {
+            alert("Employee not found");
+            form.reset();
           }
         })
-        .catch(err => {
-          loading.style.display = "none";
-          alert("Error fetching employee data.");
-        });
+        .catch(() => alert("Error fetching employee data"))
+        .finally(() => loading.style.display = "none");
     });
 
-    empNameSelect.addEventListener("change", () => {
-      const selected = matchedEmployees.find(e => e.emp_name === empNameSelect.value);
-      if (selected) fillEmployeeData(selected);
+    empNameSelect.addEventListener("change", function () {
+      const selectedName = this.value;
+      const emp = matchedEmployees.find(e => e.emp_name === selectedName);
+      if (emp) {
+        form.hod.value = emp.hod;
+        form.design_name.value = emp.design_name;
+        form.dept_name.value = emp.dept_name;
+        form.hod_mail.value = emp.hod_mail;
+        document.getElementById("cl_balance").innerText = emp.cl;
+        document.getElementById("sl_balance").innerText = emp.sl;
+        document.getElementById("coff_balance").innerText = emp.coff;
+        document.getElementById("total_balance").innerText = emp.total_leave;
+        form.dataset.cl = emp.cl;
+        form.dataset.sl = emp.sl;
+        form.dataset.coff = emp.coff;
+      }
     });
 
-    function fillEmployeeData(emp) {
-      form.hod.value = emp.hod;
-      form.desig_name.value = emp.desig_name;
-      form.dept_name.value = emp.dept_name;
-      form.hod_mail.value = emp.hod_mail;
-    }
+    form.leave_type.addEventListener("change", calculateLeave);
+    form.from_date.addEventListener("change", calculateLeave);
+    form.to_date.addEventListener("change", calculateLeave);
 
-    function calculateLeaveDays() {
+    function calculateLeave() {
       const from = new Date(form.from_date.value);
       const to = new Date(form.to_date.value);
-      if (!isNaN(from) && !isNaN(to)) {
-        if (to < from) {
-          alert("TO DATE cannot be before FROM DATE.");
-          form.to_date.value = "";
-          form.leave_count.value = "";
-        } else {
-          const diff = (to - from) / (1000 * 3600 * 24) + 1;
-          form.leave_count.value = diff;
-        }
+      if (!form.leave_type.value || isNaN(from) || isNaN(to)) return;
+      const days = Math.floor((to - from) / (1000 * 60 * 60 * 24)) + 1;
+      form.taken_leave_count.value = days;
+      const balance = parseInt(form.dataset[form.leave_type.value.toLowerCase()] || 0);
+      if (form.leave_type.value !== "out side duty" && days > balance) {
+        document.getElementById("error").innerText = Insufficient ${form.leave_type.value} balance.;
+      } else {
+        document.getElementById("error").innerText = "";
       }
     }
 
-    form.from_date.addEventListener("change", calculateLeaveDays);
-    form.to_date.addEventListener("change", calculateLeaveDays);
-
     form.addEventListener("submit", e => {
       e.preventDefault();
-      loading.style.display = "flex";
+      if (document.getElementById("error").innerText) return alert("Please fix errors before submitting");
+      confirmModal.style.display = "flex";
+    });
 
+    document.getElementById("confirmYes").onclick = () => {
+      confirmModal.style.display = "none";
+      loading.style.display = "flex";
       const formData = new FormData(form);
-      const jsonData = Object.fromEntries(formData.entries());
 
       fetch(scriptURL, {
         method: "POST",
-        body: JSON.stringify(jsonData),
-        headers: { "Content-Type": "application/json" },
+        body: formData
       })
-        .then(response => {
-          loading.style.display = "none";
-          if (response.ok) {
-            alert("Leave request submitted successfully.");
-            form.reset();
-            empNameSelect.innerHTML = '<option value="">--Select Employee--</option>';
-          } else {
-            alert("Submission failed.");
-          }
+        .then(res => res.text())
+        .then(msg => {
+          alert(msg);
+          const mailto = mailto:${form.hod_mail.value}?subject=Leave Approval&body=Approve leave for ${form.emp_name.value} from ${form.from_date.value} to ${form.to_date.value};
+          window.open(mailto);
+          form.reset();
         })
-        .catch(err => {
-          loading.style.display = "none";
-          alert("Error submitting form.");
-        });
-    });
+        .catch(err => alert("Submission failed"))
+        .finally(() => loading.style.display = "none");
+    };
+
+    document.getElementById("confirmNo").onclick = () => {
+      confirmModal.style.display = "none";
+    };
   </script>
 </body>
 </html>
