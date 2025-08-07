@@ -11,33 +11,24 @@
 
     video#bg-video {
       position: fixed;
-      top: 0;
-      left: 0;
-      min-width: 100vw;
-      min-height: 100vh;
-      z-index: -1;
-      object-fit: cover;
-      opacity: 0.5;
+      top: 0; left: 0;
+      min-width: 100vw; min-height: 100vh;
+      z-index: -1; object-fit: cover; opacity: 0.5;
     }
 
     #authOverlay {
-      position: fixed;
-      top: 0; left: 0;
+      position: fixed; top: 0; left: 0;
       width: 100%; height: 100%;
       background-color: rgba(0, 0, 0, 0.85);
       z-index: 10000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      flex-direction: column;
+      display: flex; align-items: center; justify-content: center;
+      color: white; flex-direction: column;
     }
 
     .form-container {
       max-width: 600px;
       background: rgba(255, 255, 255, 0.95);
-      padding: 30px;
-      margin: 50px auto;
+      padding: 30px; margin: 50px auto;
       border-radius: 12px;
       box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
     }
@@ -129,7 +120,13 @@
 
     <form id="leaveForm">
       <label>EMP_CODE: <input type="text" name="emp_code" id="emp_code" required /></label>
-      <label>EMP_NAME: <input type="text" name="emp_name" id="emp_name" required readonly /></label>
+
+      <label>EMP_NAME:
+        <select name="emp_name" id="emp_name" required>
+          <option value="">--Select Employee--</option>
+        </select>
+      </label>
+
       <label>HOD: <input type="text" name="hod" id="hod" readonly /></label>
       <label>DESIG_NAME: <input type="text" name="design_name" id="design_name" readonly /></label>
       <label>DEPT_NAME: <input type="text" name="dept_name" id="dept_name" readonly /></label>
@@ -158,6 +155,7 @@
     const form = document.getElementById("leaveForm");
     const loading = document.getElementById("loading");
     const confirmModal = document.getElementById("confirmModal");
+    const empNameSelect = document.getElementById("emp_name");
 
     function handleCredentialResponse(response) {
       const decoded = JSON.parse(atob(response.credential.split('.')[1]));
@@ -187,20 +185,15 @@
       fetch(`${scriptURL}?emp_code=${code}`)
         .then(res => res.json())
         .then(data => {
-          if (data.found && data.employees.length) {
-            const emp = data.employees[0];
-            form.emp_name.value = emp.emp_name;
-            form.hod.value = emp.hod;
-            form.design_name.value = emp.design_name;
-            form.dept_name.value = emp.dept_name;
-            form.hod_mail.value = emp.hod_mail;
-            document.getElementById("cl_balance").innerText = emp.cl;
-            document.getElementById("sl_balance").innerText = emp.sl;
-            document.getElementById("coff_balance").innerText = emp.coff;
-            document.getElementById("total_balance").innerText = emp.total_leave;
-            form.dataset.cl = emp.cl;
-            form.dataset.sl = emp.sl;
-            form.dataset.coff = emp.coff;
+          empNameSelect.innerHTML = '<option value="">--Select Employee--</option>';
+          if (data.found && data.employees.length > 0) {
+            data.employees.forEach((emp, index) => {
+              const option = document.createElement("option");
+              option.value = index;
+              option.textContent = emp.emp_name;
+              option.dataset.emp = JSON.stringify(emp);
+              empNameSelect.appendChild(option);
+            });
           } else {
             alert("Employee not found");
             form.reset();
@@ -208,6 +201,29 @@
         })
         .catch(() => alert("Error fetching employee data"))
         .finally(() => loading.style.display = "none");
+    });
+
+    empNameSelect.addEventListener("change", function () {
+      const selectedOption = this.options[this.selectedIndex];
+      const emp = selectedOption.dataset.emp ? JSON.parse(selectedOption.dataset.emp) : null;
+      if (emp) {
+        form.hod.value = emp.hod;
+        form.design_name.value = emp.design_name;
+        form.dept_name.value = emp.dept_name;
+        form.hod_mail.value = emp.hod_mail;
+        document.getElementById("cl_balance").innerText = emp.cl;
+        document.getElementById("sl_balance").innerText = emp.sl;
+        document.getElementById("coff_balance").innerText = emp.coff;
+        document.getElementById("total_balance").innerText = emp.total_leave;
+        form.dataset.cl = emp.cl;
+        form.dataset.sl = emp.sl;
+        form.dataset.coff = emp.coff;
+      } else {
+        form.hod.value = "";
+        form.design_name.value = "";
+        form.dept_name.value = "";
+        form.hod_mail.value = "";
+      }
     });
 
     form.leave_type.addEventListener("change", calculateLeave);
@@ -246,7 +262,7 @@
         .then(res => res.text())
         .then(msg => {
           alert(msg);
-          const mailto = `mailto:${form.hod_mail.value}?subject=Leave Approval&body=Approve leave for ${form.emp_name.value} from ${form.from_date.value} to ${form.to_date.value}`;
+          const mailto = `mailto:${form.hod_mail.value}?subject=Leave Approval&body=Approve leave for ${empNameSelect.options[empNameSelect.selectedIndex].text} from ${form.from_date.value} to ${form.to_date.value}`;
           window.open(mailto);
           form.reset();
         })
