@@ -1,4 +1,4 @@
-<!-- PASTE INTO YOUR GitHub HTML FILE OR LOCAL TEST -->
+<!-- Paste this full code -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -188,9 +188,9 @@
         .then(data => {
           empNameSelect.innerHTML = '<option value="">--Select Employee--</option>';
           if (data.found && data.employees.length > 0) {
-            data.employees.forEach((emp, index) => {
+            data.employees.forEach(emp => {
               const option = document.createElement("option");
-              option.value = index;
+              option.value = emp.emp_name; // ✅ FIXED LINE
               option.textContent = emp.emp_name;
               option.dataset.emp = JSON.stringify(emp);
               empNameSelect.appendChild(option);
@@ -263,7 +263,7 @@
         .then(res => res.text())
         .then(msg => {
           alert(msg);
-          const mailto = `mailto:${form.hod_mail.value}?subject=Leave Approval&body=Approve leave for ${empNameSelect.options[empNameSelect.selectedIndex].text} from ${form.from_date.value} to ${form.to_date.value}`;
+          const mailto = `mailto:${form.hod_mail.value}?subject=Leave Approval&body=Approve leave for ${empNameSelect.value} from ${form.from_date.value} to ${form.to_date.value}`;
           window.open(mailto);
           form.reset();
         })
