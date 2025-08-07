@@ -1,1 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Leave Application Form</title>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+    html, body { margin: 0; padding: 0; height: 100%; overflow-x: hidden; }
+    #bg-video {
+      position: fixed;
+      right: 0; bottom: 0;
+      min-width: 100%; min-height: 100%;
+      z-index: -1;
+      object-fit: cover;
+      filter: brightness(60%);
+    }
+    .form-container {
+      background: rgba(255, 255, 255, 0.9);
+      max-width: 600px;
+      margin: 30px auto;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.4);
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      margin-bottom: 12px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #004d99;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #003366;
+    }
+    #loading {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(255,255,255,0.8);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+    }
+    .balances {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
+    }
+    .balances div {
+      flex: 1;
+      margin: 0 5px;
+      padding: 8px;
+      background-color: #f0f8ff;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      text-align: center;
+    }
+    #error {
+      color: red;
+      font-weight: bold;
+      margin-top: -10px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+<video autoplay muted loop id="bg-video" preload="none">
+  <source src="https://www.w3schools.com/howto/rain.mp4" type="video/mp4" />
+</video>
+
+<div class="form-container">
+  <form id="leaveForm">
+    <label>EMP_CODE:
+      <input type="text" name="emp_code" id="emp_code" required />
+    </label>
+
+    <label>EMP_NAME:
+      <select name="emp_name" id="emp_name" required></select>
+    </label>
+
+    <label>HOD:
+      <input type="text" name="hod" id="hod" readonly />
+    </label>
+
+    <label>DESIG_NAME:
+      <input type="text" name="desig_name" id="design_name" readonly />
+    </label>
+
+    <label>DEPT_NAME:
+      <input type="text" name="dept_name" id="dept_name" readonly />
+    </label>
+
+    <label>LEAVE TYPE:
+      <select name="leave_type" id="leave_type" required>
+        <option value="">Select Leave Type</option>
+        <option value="CL">CL</option>
+        <option value="SL">SL</option>
+        <option value="COFF">COFF</option>
+      </select>
+    </label>
+
+    <label>FROM DATE:
+      <input type="date" name="from_date" id="from_date" required />
+    </label>
+
+    <label>TO DATE:
+      <input type="date" name="to_date" id="to_date" required />
+    </label>
+
+    <label>REASON:
+      <textarea name="reason" id="reason" rows="3" required></textarea>
+    </label>
+
+    <label>TAKEN LEAVE COUNT:
+      <input type="number" name="leave_count" id="leave_count" readonly />
+    </label>
+
+    <label>HOD MAIL:
+      <input type="email" name="hod_mail" id="hod_mail" readonly />
+    </label>
+
+    <label>USER MAIL:
+      <input type="email" name="user_mail" id="user_mail" readonly />
+    </label>
+
+    <div class="balances">
+      <div>CL: <span id="cl_balance">-</span></div>
+      <div>SL: <span id="sl_balance">-</span></div>
+      <div>COFF: <span id="coff_balance">-</span></div>
+      <div>Total: <span id="total_balance">-</span></div>
+    </div>
+
+    <div id="error"></div>
+
+    <button type="submit">Submit</button>
+  </form>
+</div>
+
+<div id="loading">Please wait...</div>
+
+<script>
+  const scriptURL = "https://script.google.com/macros/s/AKfycbwo_9o4UxgcQfFxQtEHPb9351an-SoYQQ3d2CfeWh4v0Qr-BHHXzjtp9ccEGULNC_AfNw/exec";
+
+  document.getElementById("emp_code").addEventListener("change", async () => {
+    const code = document.getElementById("emp_code").value.trim();
+    if (!code) return;
+
+    document.getElementById("loading").style.display = "flex";
+
+    try {
+      const response = await fetch(`${scriptURL}?emp_code=${code}`);
+      const data = await response.json();
+      const empNameSelect = document.getElementById("emp_name");
+
+      empNameSelect.innerHTML = "";
+      data.forEach(emp => {
+        const option = document.createElement("option");
+        option.value = emp.emp_name;
+        option.textContent = emp.emp_name;
+        option.dataset.hod = emp.hod;
+        option.dataset.desig = emp.desig_name;
+        option.dataset.dept = emp.dept_name;
+        option.dataset.hodmail = emp.hod_mail;
+        option.dataset.cl = emp.cl;
+        option.dataset.sl = emp.sl;
+        option.dataset.coff = emp.coff;
+        option.dataset.total = emp.total_leave;
+        empNameSelect.appendChild(option);
+      });
+
+      if (data.length > 0) {
+        empNameSelect.selectedIndex = 0;
+        empNameSelect.dispatchEvent(new Event("change"));
+      }
+    } catch (err) {
+      alert("Error fetching employee data.");
+    }
+
+    document.getElementById("loading").style.display = "none";
+  });
+
+  document.getElementById("emp_name").addEventListener("change", () => {
+    const selected = document.getElementById("emp_name").selectedOptions[0];
+    const form = document.getElementById("leaveForm");
+
+    form.hod.value = selected.dataset.hod;
+    form.design_name.value = selected.dataset.desig;
+    form.dept_name.value = selected.dataset.dept;
+    form.hod_mail.value = selected.dataset.hodmail;
+
+    document.getElementById("cl_balance").innerText = selected.dataset.cl;
+    document.getElementById("sl_balance").innerText = selected.dataset.sl;
+    document.getElementById("coff_balance").innerText = selected.dataset.coff;
+    document.getElementById("total_balance").innerText = selected.dataset.total;
+
+    form.dataset.cl = selected.dataset.cl;
+    form.dataset.sl = selected.dataset.sl;
+    form.dataset.coff = selected.dataset.coff;
+  });
+
+  ["from_date", "to_date"].forEach(id =>
+    document.getElementById(id).addEventListener("change", () => {
+      const from = new Date(document.getElementById("from_date").value);
+      const to = new Date(document.getElementById("to_date").value);
+      const days = Math.floor((to - from) / (1000 * 60 * 60 * 24)) + 1;
+      document.getElementById("leave_count").value = (days > 0) ? days : "";
+    })
+  );
+
+  document.getElementById("leaveForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const form = e.target;
+
+    if (!confirm("Are you sure you want to submit?")) return;
+
+    const balance = parseFloat(form.dataset[form.leave_type.value.toLowerCase()] || 0);
+    const requested = parseFloat(form.leave_count.value || 0);
+
+    if (requested > balance) {
+      document.getElementById("error").innerText = `Insufficient ${form.leave_type.value} balance.`;
+      return;
+    } else {
+      document.getElementById("error").innerText = "";
+    }
+
+    document.getElementById("loading").style.display = "flex";
+
+    const formData = new FormData(form);
+    try {
+      const response = await fetch(scriptURL, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (response.ok) {
+        const empNameSelect = document.getElementById("emp_name");
+        const mailto = `mailto:${form.hod_mail.value}?subject=Leave Approval&body=Approve leave for ${empNameSelect.options[empNameSelect.selectedIndex].text} from ${form.from_date.value} to ${form.to_date.value}`;
+        window.open(mailto, "_blank");
+        alert("Leave request submitted successfully.");
+        form.reset();
+        ["cl_balance", "sl_balance", "coff_balance", "total_balance"].forEach(id => document.getElementById(id).innerText = "-");
+      } else {
+        alert("Submission failed.");
+      }
+    } catch (err) {
+      alert("Error submitting form.");
+    }
+
+    document.getElementById("loading").style.display = "none";
+  });
+
+  // Google Sign-In
+  window.onload = function () {
+    google.accounts.id.initialize({
+      client_id: "729886228755-gsukn0q9etkg8qif6vlcnc3vpj8ur93h.apps.googleusercontent.com",
+      callback: (response) => {
+        const decoded = JSON.parse(atob(response.credential.split('.')[1]));
+        document.getElementById("user_mail").value = decoded.email;
+      }
+    });
+    google.accounts.id.prompt();
+  };
+</script>
+</body>
+</html>
 
